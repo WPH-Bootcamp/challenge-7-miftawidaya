@@ -8,6 +8,8 @@
  * For development and testing purposes only.
  */
 
+import { Logo } from '@/components/icons';
+
 export function ComponentTest() {
   return (
     <div className='custom-container space-y-10xl py-6xl'>
@@ -20,6 +22,59 @@ export function ComponentTest() {
           Verify UI components (Button, Input, Badge, etc.)
         </p>
       </header>
+
+      {/* Logo Section - Demo CSS Color Control */}
+      <section className='space-y-4xl' aria-labelledby='logo-heading'>
+        <h2
+          id='logo-heading'
+          className='text-display-sm text-foreground font-bold'
+        >
+          Logo (Single SVG with CSS Color Control)
+        </h2>
+
+        <div className='space-y-3xl'>
+          {/* Original Brand Color - Red on Light BG */}
+          <div className='bg-card p-4xl space-y-md rounded-2xl'>
+            <p className='text-muted-foreground text-sm'>
+              Primary Color (text-primary) - Light Background
+            </p>
+            <span className='text-primary inline-block'>
+              <Logo title='Logo primary color' />
+            </span>
+          </div>
+
+          {/* White Logo on Dark BG */}
+          <div className='bg-foreground p-4xl space-y-md rounded-2xl'>
+            <p className='text-background text-sm'>
+              White Logo (text-white) - Dark Background
+            </p>
+            <span className='inline-block text-white'>
+              <Logo title='Logo white' />
+            </span>
+          </div>
+
+          {/* Multiple Sizes & Colors Demo */}
+          <div className='bg-card p-4xl space-y-md rounded-2xl'>
+            <p className='text-muted-foreground text-sm'>
+              Different Sizes and Colors (same component)
+            </p>
+            <div className='gap-4xl flex items-center'>
+              <span className='text-primary'>
+                <Logo className='size-6' title='Logo small' />
+              </span>
+              <span className='text-muted-foreground'>
+                <Logo className='size-8' title='Logo medium gray' />
+              </span>
+              <span className='text-primary'>
+                <Logo className='size-12' title='Logo large' />
+              </span>
+              <span className='text-destructive'>
+                <Logo title='Logo destructive color' />
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Buttons Section */}
       <section className='space-y-4xl' aria-labelledby='buttons-heading'>

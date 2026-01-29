@@ -169,19 +169,17 @@ export function DesignSystemTest() {
             </h3>
             <div className='gap-md flex flex-wrap'>
               {NEUTRAL_SWATCHES.map((swatch) => (
-                <div key={swatch.shade} className='text-center'>
+                <figure key={swatch.shade} className='text-center'>
                   <div
                     className={cn(
                       'border-border size-16 rounded-lg border',
                       swatch.bgClass
                     )}
-                    role='img'
-                    aria-label={`Neutral ${swatch.shade} color swatch`}
                   />
-                  <span className='mt-xs text-muted-foreground text-xs'>
+                  <figcaption className='mt-xs text-muted-foreground text-xs'>
                     {swatch.shade}
-                  </span>
-                </div>
+                  </figcaption>
+                </figure>
               ))}
             </div>
           </div>
@@ -192,46 +190,30 @@ export function DesignSystemTest() {
               Primary and Accent
             </h3>
             <div className='gap-lg flex flex-wrap'>
-              <div className='text-center'>
-                <div
-                  className='bg-primary size-16 rounded-lg'
-                  role='img'
-                  aria-label='Primary color swatch'
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+              <figure className='text-center'>
+                <div className='bg-primary size-16 rounded-lg' />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   Primary
-                </span>
-              </div>
-              <div className='text-center'>
-                <div
-                  className='bg-status-error size-16 rounded-lg'
-                  role='img'
-                  aria-label='Error status color swatch'
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+                </figcaption>
+              </figure>
+              <figure className='text-center'>
+                <div className='bg-status-error size-16 rounded-lg' />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   Status Error
-                </span>
-              </div>
-              <div className='text-center'>
-                <div
-                  className='bg-status-success size-16 rounded-lg'
-                  role='img'
-                  aria-label='Success status color swatch'
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+                </figcaption>
+              </figure>
+              <figure className='text-center'>
+                <div className='bg-status-success size-16 rounded-lg' />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   Status Success
-                </span>
-              </div>
-              <div className='text-center'>
-                <div
-                  className='bg-status-warning size-16 rounded-lg'
-                  role='img'
-                  aria-label='Warning status color swatch'
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+                </figcaption>
+              </figure>
+              <figure className='text-center'>
+                <div className='bg-status-warning size-16 rounded-lg' />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   Status Warning
-                </span>
-              </div>
+                </figcaption>
+              </figure>
             </div>
           </div>
 
@@ -241,36 +223,24 @@ export function DesignSystemTest() {
               Base Colors
             </h3>
             <div className='gap-lg flex flex-wrap'>
-              <div className='text-center'>
-                <div
-                  className='border-border bg-base-white size-16 rounded-lg border'
-                  role='img'
-                  aria-label='White base color swatch'
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+              <figure className='text-center'>
+                <div className='border-border bg-base-white size-16 rounded-lg border' />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   White
-                </span>
-              </div>
-              <div className='text-center'>
-                <div
-                  className='border-border bg-base-black size-16 rounded-lg border'
-                  role='img'
-                  aria-label='Black base color swatch'
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+                </figcaption>
+              </figure>
+              <figure className='text-center'>
+                <div className='border-border bg-base-black size-16 rounded-lg border' />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   Black
-                </span>
-              </div>
-              <div className='text-center'>
-                <div
-                  className='border-border bg-background size-16 rounded-lg border'
-                  role='img'
-                  aria-label='Background color swatch'
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+                </figcaption>
+              </figure>
+              <figure className='text-center'>
+                <div className='border-border bg-background size-16 rounded-lg border' />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   Background
-                </span>
-              </div>
+                </figcaption>
+              </figure>
             </div>
           </div>
         </div>
@@ -314,16 +284,12 @@ export function DesignSystemTest() {
         <div className='space-y-3xl bg-card p-4xl rounded-2xl'>
           <div className='gap-xl flex flex-wrap'>
             {RADIUS_TOKENS.map((radius) => (
-              <div key={radius.name} className='text-center'>
-                <div
-                  className={cn('bg-primary size-16', radius.radiusClass)}
-                  role='img'
-                  aria-label={`Border radius ${radius.name} example`}
-                />
-                <span className='mt-xs text-muted-foreground text-xs'>
+              <figure key={radius.name} className='text-center'>
+                <div className={cn('bg-primary size-16', radius.radiusClass)} />
+                <figcaption className='mt-xs text-muted-foreground text-xs'>
                   {radius.name}
-                </span>
-              </div>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
