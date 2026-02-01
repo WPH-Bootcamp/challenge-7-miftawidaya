@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@iconify/react": "^6.0.2",
+    "@untitledui/icons": "^0.0.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",

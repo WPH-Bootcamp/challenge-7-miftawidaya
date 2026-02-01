@@ -1,4 +1,4 @@
-import { ComponentTest, DesignSystemTest } from '@/components/dev';
+import { ComponentTest, DesignSystemTest, IconTest } from '@/components/dev';
 
 /**
  * Home Page - Development Mode
@@ -10,6 +10,12 @@ export default function Home() {
     <main>
       {/* Design System Test - Typography, Colors, Spacing, Radius */}
       <DesignSystemTest />
+
+      {/* Divider */}
+      <hr className='max-w-container-max mx-auto border-neutral-800' />
+
+      {/* Icon Test - Untitled UI Icons */}
+      <IconTest />
 
       {/* Divider */}
       <hr className='max-w-container-max mx-auto border-neutral-800' />
