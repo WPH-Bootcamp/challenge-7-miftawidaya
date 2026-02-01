@@ -18,7 +18,7 @@ export function AuthLayout({
   title,
   subtitle,
   className,
-}: AuthLayoutProps) {
+}: Readonly<AuthLayoutProps>) {
   return (
     <div className='relative flex min-h-screen w-full bg-white font-sans'>
       {/* Left Column (Desktop) - Background Image */}
@@ -36,7 +36,7 @@ export function AuthLayout({
       <div className='flex w-full flex-col items-center px-6 py-10 md:w-1/2 md:justify-center md:px-20 lg:px-30'>
         <div
           className={cn(
-            'flex w-full max-w-[345px] flex-col gap-4 md:max-w-[374px] md:gap-5',
+            'flex w-full max-w-86.25 flex-col gap-4 md:max-w-93.5 md:gap-5',
             className
           )}
         >

@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { loginSchema, LoginType } from '@/lib/validations/auth';
 import { useLogin } from '@/services/queries/useAuth';
 import { cn } from '@/lib/utils';
@@ -113,15 +114,11 @@ export function LoginForm({ className }: LoginFormProps) {
           />
 
           {/* Remember Me */}
-          <div className='flex items-center gap-2'>
-            <input
-              type='checkbox'
-              id='remember-me'
-              className='accent-brand-primary size-5 shrink-0 cursor-pointer rounded-md border border-neutral-300'
-            />
+          <div className='flex h-7 items-center gap-2 md:h-7.5'>
+            <Checkbox id='remember-me' className='size-5' />
             <label
               htmlFor='remember-me'
-              className='md:text-md cursor-pointer text-sm font-medium tracking-tight text-neutral-950'
+              className='md:text-md cursor-pointer text-sm leading-7 font-medium tracking-tight text-neutral-950 md:leading-7.5'
             >
               Remember Me
             </label>

@@ -37,18 +37,21 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        'z-header duration-header fixed inset-x-0 top-0 transition-all ease-in-out',
+        'z-header fixed inset-x-0 top-0 transition-all duration-300 ease-in-out',
         isScrolled
-          ? 'h-header-mobile lg:h-header bg-base-white shadow-sm'
+          ? 'h-header-mobile bg-base-white lg:h-header shadow-sm'
           : 'h-header-mobile lg:h-header bg-transparent shadow-none'
       )}
     >
-      <div className='custom-container mx-auto flex h-20 items-center justify-between'>
+      <div className='custom-container mx-auto flex h-full items-center justify-between'>
         {/* Logo Section */}
-        <Link href='/' className='group flex items-center gap-3 outline-hidden'>
+        <Link
+          href='/'
+          className='group flex cursor-pointer items-center gap-3 outline-none'
+        >
           <Logo
             className={cn(
-              'duration-header size-10 transition-colors md:size-10.5',
+              'duration-header size-10 transition-colors group-hover:animate-spin md:size-10.5',
               isScrolled ? 'text-primary' : 'text-base-white'
             )}
           />
@@ -97,7 +100,7 @@ export function Navbar() {
               <Button
                 variant='outline'
                 className={cn(
-                  'min-w-btn-auth h-10 rounded-full px-6 font-bold transition-all md:h-12',
+                  'md:min-w-btn-auth h-10 rounded-full px-6 font-bold transition-all md:h-12',
                   isScrolled
                     ? 'border-neutral-300 text-neutral-950 hover:bg-neutral-50'
                     : 'border-white text-white hover:bg-white/10'
@@ -111,7 +114,7 @@ export function Navbar() {
             <Link href='/register' className='hidden md:block'>
               <Button
                 className={cn(
-                  'min-w-btn-auth h-10 rounded-full px-6 font-bold transition-all md:h-12',
+                  'md:min-w-btn-auth h-10 rounded-full px-6 font-bold transition-all md:h-12',
                   isScrolled
                     ? 'bg-brand-primary text-white hover:opacity-90'
                     : 'bg-white text-neutral-950 hover:bg-neutral-100'
