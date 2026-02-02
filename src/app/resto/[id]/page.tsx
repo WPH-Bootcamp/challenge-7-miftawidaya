@@ -33,7 +33,7 @@ export default function RestaurantDetailPage() {
       {/* Header / Gallery */}
       <div className='relative h-60 w-full overflow-hidden md:h-100'>
         <Image
-          src={restaurant.image}
+          src={restaurant.image || '/images/placeholder.png'}
           alt={restaurant.name}
           fill
           className='object-cover'

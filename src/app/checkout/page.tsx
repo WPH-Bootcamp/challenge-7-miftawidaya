@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
-import { CartItem } from '@/types';
+import { CartGroup, CartItemNested } from '@/types';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -21,20 +21,29 @@ export default function CheckoutPage() {
   const checkout = useCheckout();
 
   const total =
-    cartData?.items.reduce(
-      (acc: number, item: CartItem) => acc + item.price * item.quantity,
+    cartData?.reduce(
+      (acc: number, group: CartGroup) => acc + group.subtotal,
       0
     ) || 0;
 
   const handleCheckout = () => {
-    checkout.mutate(
-      {
-        /* payload */
-      },
-      {
-        onSuccess: () => router.push('/checkout/success'),
-      }
-    );
+    const payload = {
+      restaurants: cartData?.map((group: CartGroup) => ({
+        restaurantId: group.restaurant.id,
+        items: group.items.map((item: CartItemNested) => ({
+          menuId: item.menu.id,
+          quantity: item.quantity,
+        })),
+      })),
+      deliveryAddress: 'Jl. Sudirman No. 25, Jakarta Pusat, 10220', // TODO: From form
+      phone: '081234567890', // TODO: From form
+      paymentMethod: 'CASH',
+      notes: '',
+    };
+
+    checkout.mutate(payload, {
+      onSuccess: () => router.push('/checkout/success'),
+    });
   };
 
   return (
@@ -78,15 +87,30 @@ export default function CheckoutPage() {
       <aside className='w-full max-w-sm shrink-0'>
         <div className='sticky top-24 flex flex-col gap-6 rounded-2xl bg-white p-8 shadow-xl'>
           <h3 className='text-lg font-bold text-neutral-950'>Order Summary</h3>
-          <div className='flex flex-col gap-4'>
-            {cartData?.items.map((item: CartItem) => (
-              <div key={item.id} className='flex justify-between gap-4 text-sm'>
-                <span className='text-neutral-500'>
-                  {item.quantity}x {item.name}
-                </span>
-                <span className='font-bold'>
-                  Rp {(item.price * item.quantity).toLocaleString('id-ID')}
-                </span>
+          <div className='flex flex-col gap-6'>
+            {cartData?.map((group: CartGroup) => (
+              <div key={group.restaurant.id} className='flex flex-col gap-2'>
+                <p className='text-xs font-bold text-neutral-400 uppercase'>
+                  {group.restaurant.name}
+                </p>
+                <div className='flex flex-col gap-2'>
+                  {group.items.map((item: CartItemNested) => (
+                    <div
+                      key={item.id}
+                      className='flex justify-between gap-4 text-sm'
+                    >
+                      <span className='text-neutral-500'>
+                        {item.quantity}x {item.menu.foodName}
+                      </span>
+                      <span className='font-bold'>
+                        Rp{' '}
+                        {(item.menu.price * item.quantity).toLocaleString(
+                          'id-ID'
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

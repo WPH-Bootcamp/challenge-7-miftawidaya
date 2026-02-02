@@ -45,7 +45,12 @@ export function MenuCard({
   return (
     <div className='flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md'>
       <div className='relative size-20 shrink-0 overflow-hidden rounded-xl bg-neutral-100 md:size-24'>
-        <Image src={item.image} alt={item.name} fill className='object-cover' />
+        <Image
+          src={item.image || '/images/placeholder.png'}
+          alt={item.name}
+          fill
+          className='object-cover'
+        />
       </div>
       <div className='flex flex-1 flex-col gap-1'>
         <div className='flex items-start justify-between gap-2'>
@@ -79,7 +84,7 @@ export function ReviewCard({ review }: { review: Review }) {
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-3'>
           <div className='relative size-10 overflow-hidden rounded-full bg-neutral-100'>
-            {review.userAvatar && (
+            {review.userAvatar && review.userAvatar !== '' && (
               <Image src={review.userAvatar} alt={review.userName} fill />
             )}
           </div>

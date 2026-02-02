@@ -25,7 +25,7 @@ export function RestaurantCard({ restaurant, className }: RestaurantCardProps) {
       {/* Image Container */}
       <div className='relative aspect-square w-full overflow-hidden rounded-xl bg-neutral-100'>
         <Image
-          src={restaurant.image}
+          src={restaurant.image || '/images/placeholder.png'}
           alt={restaurant.name}
           fill
           className='object-cover transition-transform duration-500 group-hover:scale-105'

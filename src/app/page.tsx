@@ -12,9 +12,13 @@ import { CategoryFilter } from '@/components/home/CategoryFilter';
 
 import { RestaurantGrid } from '@/components/menu/RestaurantGrid';
 import { useRecommendedRestaurants } from '@/services/queries';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/features/store';
 
 export default function Home() {
-  const { data: recommended, isLoading } = useRecommendedRestaurants();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { data: recommended, isLoading } =
+    useRecommendedRestaurants(isAuthenticated);
 
   return (
     <div className='flex flex-col'>

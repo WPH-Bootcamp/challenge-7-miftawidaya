@@ -28,7 +28,7 @@ export default function OrdersPage() {
               <div className='flex items-center gap-6'>
                 <div className='relative size-20 overflow-hidden rounded-xl bg-neutral-100'>
                   <Image
-                    src={order.restaurantImage}
+                    src={order.restaurantImage || '/images/placeholder.png'}
                     alt={order.restaurantName}
                     fill
                     className='object-cover'

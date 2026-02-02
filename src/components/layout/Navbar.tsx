@@ -19,8 +19,7 @@ import { ProfileMenu } from './ProfileMenu';
 import { cn } from '@/lib/utils';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { useCart } from '@/services/queries';
-
-import { CartItem } from '@/types';
+import { CartGroup, CartItemNested } from '@/types';
 
 const SCROLL_THRESHOLD = 20;
 
@@ -37,8 +36,13 @@ export function Navbar() {
 
   const { data: cartData } = useCart();
   const cartCount =
-    cartData?.items.reduce(
-      (acc: number, item: CartItem) => acc + item.quantity,
+    cartData?.reduce(
+      (acc: number, group: CartGroup) =>
+        acc +
+        group.items.reduce(
+          (sum: number, item: CartItemNested) => sum + item.quantity,
+          0
+        ),
       0
     ) || 0;
 

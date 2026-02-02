@@ -46,14 +46,26 @@ export interface RestaurantDetail extends Restaurant {
  * Cart Types
  */
 
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
+export interface CartItemNested {
+  id: string | number;
+  menu: {
+    id: string | number;
+    foodName: string;
+    price: number;
+    image?: string;
+  };
   quantity: number;
-  restaurantId: string;
-  restaurantName: string;
+  itemTotal: number;
+}
+
+export interface CartGroup {
+  restaurant: {
+    id: string | number;
+    name: string;
+    logo?: string;
+  };
+  items: CartItemNested[];
+  subtotal: number;
 }
 
 /**

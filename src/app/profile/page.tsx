@@ -17,7 +17,7 @@ export default function ProfilePage() {
       <div className='flex w-full max-w-2xl flex-col gap-10 rounded-3xl border border-neutral-100 bg-white p-10 shadow-sm'>
         <div className='flex flex-col items-center gap-6'>
           <div className='relative size-32 overflow-hidden rounded-full border-4 border-neutral-50'>
-            {user.avatar ? (
+            {user.avatar && user.avatar !== '' ? (
               <Image
                 src={user.avatar}
                 alt={user.name}

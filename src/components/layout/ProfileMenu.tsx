@@ -42,7 +42,7 @@ export function ProfileMenu({
       <DropdownMenuTrigger asChild>
         <button className='group flex cursor-pointer items-center gap-3 outline-hidden'>
           <Avatar className='size-10 transition-transform group-hover:scale-105 md:size-12'>
-            <AvatarImage src={avatarUrl} alt={name} />
+            <AvatarImage src={avatarUrl || undefined} alt={name} />
             <AvatarFallback className='bg-brand-primary text-base-white'>
               {name.charAt(0)}
             </AvatarFallback>
