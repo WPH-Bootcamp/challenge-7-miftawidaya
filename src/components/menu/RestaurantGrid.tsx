@@ -16,21 +16,21 @@ export function RestaurantGrid({
   restaurants,
   isLoading,
   className,
-  columns = 4,
-}: RestaurantGridProps) {
+  columns = 3,
+}: Readonly<RestaurantGridProps>) {
   if (isLoading) {
     return (
       <div
         className={cn(
-          'grid gap-6',
-          columns === 4
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+          'grid gap-4 md:gap-5',
+          columns === 3
+            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
             : 'grid-cols-1 md:grid-cols-2',
           className
         )}
       >
-        {Array.from({ length: 8 }).map((_, i) => (
-          <RestaurantCardSkeleton key={i} />
+        {['sk-1', 'sk-2', 'sk-3', 'sk-4', 'sk-5', 'sk-6'].map((id) => (
+          <RestaurantCardSkeleton key={id} />
         ))}
       </div>
     );
@@ -52,10 +52,10 @@ export function RestaurantGrid({
   return (
     <div
       className={cn(
-        'grid gap-6',
-        columns === 4
-          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
-          : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
+        'grid gap-4 md:gap-5',
+        columns === 3
+          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+          : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2',
         className
       )}
     >

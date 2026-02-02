@@ -48,14 +48,14 @@ export function CategoryFilter({ activeCategory = '' }: CategoryFilterProps) {
   };
 
   return (
-    <section className='w-full pb-10 md:pb-16' aria-label='Food categories'>
+    <section className='w-full pb-3 md:pb-12' aria-label='Food categories'>
       {/* Mobile-only Filter Sheet */}
       <FilterSheet isOpen={isFilterOpen} onOpenChange={setIsFilterOpen} />
 
       <div
         className={cn(
           'mx-auto flex items-center',
-          'flex-wrap justify-center gap-(--spacing-category-gap-mobile) px-4 py-6',
+          'flex-wrap justify-center gap-(--spacing-category-gap-mobile)',
           'md:gap-category-gap-desktop md:w-full md:flex-nowrap md:justify-between md:p-0'
         )}
       >

@@ -136,7 +136,8 @@
   --width-sidebar-desktop: 17.5rem; /* 280px */
   --height-category-item: 6.25rem; /* 100px */
   --size-category-icon-desktop: 4.0625rem; /* 65px */
-  --height-restaurant-card-mock: 15rem; /* 240px */
+  --size-restaurant-thumb-mobile: 5.625rem; /* 90px */
+  --size-restaurant-thumb-desktop: 7.5rem; /* 120px */
   --width-price-prefix: 2.75rem; /* 44px */
   --padding-price-input-left: 3.75rem; /* 60px */
 
