@@ -71,7 +71,7 @@ export function RestaurantCard({ restaurant, className }: RestaurantCardProps) {
       {/* Thumbnail Container */}
       <div className='size-restaurant-thumb-mobile md:size-restaurant-thumb-desktop relative shrink-0 overflow-hidden rounded-xl bg-neutral-100'>
         <ImageWithFallback
-          src={restaurant.image}
+          src={restaurant.logo}
           alt={restaurant.name}
           fill
           className='object-cover transition-transform duration-500 group-hover:scale-105'
