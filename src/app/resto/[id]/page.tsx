@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icon } from '@iconify/react';
 import { useRestaurantDetail, useAddToCart } from '@/services/queries';
 import { MenuCard, ReviewCard } from '@/components/menu/MenuElements';
@@ -10,6 +9,15 @@ import { MenuItem } from '@/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/features/store';
 import { ROUTES } from '@/config/routes';
+import {
+  DEFAULT_DISTANCE,
+  MENU_INITIAL_COUNT,
+  MENU_LOAD_INCREMENT,
+  REVIEW_INITIAL_COUNT,
+  REVIEW_LOAD_INCREMENT,
+} from '@/config/constants';
+import { cn } from '@/lib/utils';
+import React from 'react';
 
 export default function RestaurantDetailPage() {
   const { id: restaurantId } = useParams();
@@ -22,9 +30,17 @@ export default function RestaurantDetailPage() {
   );
   const addToCart = useAddToCart();
 
+  // State for filtering and pagination
+  const [activeCategory, setActiveCategory] = React.useState<
+    'ALL' | 'FOOD' | 'DRINK'
+  >('ALL');
+  const [visibleMenuCount, setVisibleMenuCount] =
+    React.useState(MENU_INITIAL_COUNT);
+  const [visibleReviewCount, setVisibleReviewCount] =
+    React.useState(REVIEW_INITIAL_COUNT);
+
   const handleAddToCart = (item: MenuItem) => {
     if (!isAuthenticated) {
-      // Save pending item
       const pendingItem = {
         restaurantId: restaurantId as string,
         menuId: item.id,
@@ -42,119 +58,328 @@ export default function RestaurantDetailPage() {
     });
   };
 
+  /**
+   * Handle native browser share or fallback to clipboard copy
+   */
+  const handleShare = async () => {
+    const shareData = {
+      title: restaurant?.name ?? 'Restaurant',
+      text: `Check out ${restaurant?.name ?? 'this restaurant'} on Foody!`,
+      url: globalThis.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // User cancelled or share failed silently
+      }
+    } else {
+      // Fallback: copy URL to clipboard
+      try {
+        await navigator.clipboard.writeText(globalThis.location.href);
+        alert('Link copied to clipboard!');
+      } catch {
+        // Clipboard API failed
+      }
+    }
+  };
+
   if (isLoading)
     return (
-      <div className='flex h-screen items-center justify-center'>
-        Loading...
+      <div className='flex h-screen items-center justify-center bg-white'>
+        <div className='flex flex-col items-center gap-4'>
+          <div className='border-brand-primary size-12 animate-spin rounded-full border-4 border-t-transparent' />
+          <p className='font-bold text-neutral-500'>Loading deliciousness...</p>
+        </div>
       </div>
     );
+
   if (!restaurant)
     return (
-      <div className='flex h-screen items-center justify-center'>
-        Restaurant not found
+      <div className='flex h-screen items-center justify-center bg-white'>
+        <div className='flex flex-col items-center gap-6'>
+          <div className='flex size-20 items-center justify-center rounded-full bg-neutral-100'>
+            <Icon
+              icon='ri:error-warning-line'
+              className='size-10 text-neutral-400'
+            />
+          </div>
+          <h2 className='text-display-xs font-extrabold text-neutral-950'>
+            Restaurant not found
+          </h2>
+          <button
+            onClick={() => router.push(ROUTES.HOME)}
+            className='text-brand-primary font-bold hover:underline'
+          >
+            Back to Home
+          </button>
+        </div>
       </div>
     );
 
-  const foods = restaurant.menu.filter((item) => item.category === 'FOOD');
-  const drinks = restaurant.menu.filter((item) => item.category === 'DRINK');
+  // Derived data
+  const filteredMenu = restaurant.menu.filter((item) => {
+    if (activeCategory === 'ALL') return true;
+    return item.category === activeCategory;
+  });
+
+  const visibleMenus = filteredMenu.slice(0, visibleMenuCount);
+  const hasMoreMenus = visibleMenuCount < filteredMenu.length;
+
+  const visibleReviews = restaurant.reviews.slice(0, visibleReviewCount);
+  const hasMoreReviews = visibleReviewCount < restaurant.reviews.length;
+
+  const galleryImages = restaurant.images || [];
 
   return (
-    <div className='flex flex-col pb-20'>
-      {/* Header / Gallery */}
-      <div className='relative h-60 w-full overflow-hidden md:h-100'>
-        <Image
-          src={restaurant.image || '/images/placeholder.png'}
-          alt={restaurant.name}
-          fill
-          className='object-cover'
-          priority
-        />
-        <div className='absolute inset-0 bg-black/30' />
-      </div>
-
-      <div className='custom-container relative z-10 mx-auto -mt-20'>
-        <div className='rounded-3xl bg-white p-6 shadow-xl md:p-10'>
-          <div className='flex flex-col justify-between gap-6 md:flex-row md:items-end'>
-            <div className='flex flex-col gap-2'>
-              <h1 className='text-display-sm md:text-display-md font-extrabold text-neutral-950'>
-                {restaurant.name}
-              </h1>
-              <div className='flex items-center gap-4 text-sm font-medium text-neutral-500'>
-                <div className='flex items-center gap-1.5'>
-                  <Icon
-                    icon='ri:map-pin-2-fill'
-                    className='text-brand-primary size-5'
+    <div className='pt-header-mobile md:pt-header flex flex-col bg-white pb-10 md:pb-12'>
+      {/* 1. Image Gallery Section */}
+      <section className='pt-4 md:pt-12'>
+        <div className='custom-container mx-auto'>
+          {/* Desktop Gallery Grid */}
+          <div className='hidden h-120 w-full gap-4 md:flex'>
+            <div className='relative h-full flex-1 overflow-hidden rounded-3xl'>
+              <Image
+                src={galleryImages[0] || restaurant.image || ''}
+                alt={restaurant.name}
+                fill
+                className='object-cover'
+                priority
+              />
+            </div>
+            <div className='flex h-full w-110 flex-col gap-4'>
+              <div className='relative h-1/2 w-full overflow-hidden rounded-3xl'>
+                <Image
+                  src={galleryImages[1] || galleryImages[0] || ''}
+                  alt={restaurant.name}
+                  fill
+                  className='object-cover'
+                />
+              </div>
+              <div className='flex h-1/2 w-full gap-4'>
+                <div className='relative flex-1 overflow-hidden rounded-3xl'>
+                  <Image
+                    src={galleryImages[2] || galleryImages[0] || ''}
+                    alt={restaurant.name}
+                    fill
+                    className='object-cover'
                   />
-                  {restaurant.place}
                 </div>
-                <div className='flex items-center gap-1.5'>
-                  <Icon icon='ri:star-fill' className='text-rating size-5' />
-                  <span className='font-bold text-neutral-950'>
-                    {restaurant.rating}
-                  </span>
-                  ({restaurant.totalReview} Reviews)
+                <div className='relative flex-1 overflow-hidden rounded-3xl'>
+                  <Image
+                    src={galleryImages[3] || galleryImages[0] || ''}
+                    alt={restaurant.name}
+                    fill
+                    className='object-cover'
+                  />
                 </div>
               </div>
             </div>
           </div>
 
-          <Tabs defaultValue='menu' className='mt-10'>
-            <TabsList className='h-14 w-full justify-start gap-8 rounded-2xl bg-neutral-100/50 p-2'>
-              <TabsTrigger
-                value='menu'
-                className='text-md px-8 py-2 font-bold transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm'
-              >
-                Menu
-              </TabsTrigger>
-              <TabsTrigger
-                value='reviews'
-                className='text-md px-8 py-2 font-bold transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm'
-              >
-                Reviews
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value='menu' className='mt-8 flex flex-col gap-10'>
-              <div className='flex flex-col gap-6'>
-                <h3 className='text-xl font-extrabold text-neutral-950'>
-                  Foods
-                </h3>
-                <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
-                  {foods.map((item) => (
-                    <MenuCard
-                      key={item.id}
-                      item={item}
-                      onAdd={handleAddToCart}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className='flex flex-col gap-6'>
-                <h3 className='text-xl font-extrabold text-neutral-950'>
-                  Drinks
-                </h3>
-                <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
-                  {drinks.map((item) => (
-                    <MenuCard
-                      key={item.id}
-                      item={item}
-                      onAdd={handleAddToCart}
-                    />
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value='reviews' className='mt-8'>
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                {restaurant.reviews.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+          {/* Mobile Gallery (Simple Banner) */}
+          <div className='relative aspect-4/3 w-full overflow-hidden rounded-2xl md:hidden'>
+            <Image
+              src={restaurant.image || ''}
+              alt={restaurant.name}
+              fill
+              className='object-cover'
+              priority
+            />
+          </div>
         </div>
+      </section>
+
+      {/* 2. Restaurant Info Header */}
+      <section className='mt-6 md:mt-10'>
+        <div className='custom-container mx-auto'>
+          <div className='flex items-center justify-between'>
+            {/* Left: Logo + Info */}
+            <div className='flex items-center gap-4'>
+              {/* Logo */}
+              <div className='size-resto-logo-mobile md:size-resto-logo-desktop bg-base-white relative shrink-0 overflow-hidden rounded-full'>
+                <Image
+                  src={restaurant.logo || ''}
+                  alt={`${restaurant.name} logo`}
+                  fill
+                  className='object-contain p-2'
+                />
+              </div>
+
+              {/* Info Container */}
+              <div className='flex flex-col gap-0.5 md:gap-1'>
+                {/* Title */}
+                <h1 className='text-md md:text-display-md font-extrabold text-neutral-950'>
+                  {restaurant.name}
+                </h1>
+
+                {/* Rating Row */}
+                <div className='flex items-center gap-1'>
+                  <Icon
+                    icon='ri:star-fill'
+                    className='text-rating size-6'
+                    aria-hidden='true'
+                  />
+                  <span className='text-sm font-medium text-neutral-950 md:text-lg md:font-semibold'>
+                    {restaurant.rating}
+                  </span>
+                </div>
+
+                {/* Location + Distance Row */}
+                <div className='flex items-center gap-1.5 md:gap-2'>
+                  <span className='text-sm font-normal tracking-tight text-neutral-950 md:text-lg md:font-medium'>
+                    {restaurant.place}
+                  </span>
+                  <div
+                    className='size-0.5 shrink-0 rounded-full bg-neutral-950'
+                    aria-hidden='true'
+                  />
+                  <span className='text-sm font-normal tracking-tight text-neutral-950 md:text-lg md:font-medium'>
+                    {restaurant.distance || DEFAULT_DISTANCE} km
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Share Button - Icon only on mobile, Icon + Text on desktop */}
+            <button
+              type='button'
+              onClick={handleShare}
+              className='md:w-11xl flex size-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border border-neutral-200 font-bold text-neutral-950 transition-colors hover:bg-neutral-50 md:h-11'
+              aria-label='Share this restaurant'
+            >
+              <Icon
+                icon='ri:share-line'
+                className='size-5'
+                aria-hidden='true'
+              />
+              <span className='hidden md:inline'>Share</span>
+            </button>
+          </div>
+
+          {/* Divider */}
+          <hr className='my-4 border-t border-neutral-200 md:my-8' />
+        </div>
+      </section>
+
+      {/* 3. Menu Section */}
+      <section>
+        <div className='custom-container mx-auto flex flex-col gap-8'>
+          <div className='flex flex-col gap-4 md:gap-6'>
+            <h2 className='text-display-xs md:text-display-lg font-extrabold text-neutral-950'>
+              Menu
+            </h2>
+
+            {/* Category Filters */}
+            <div className='scrollbar-none flex items-center gap-2 overflow-x-auto pb-2 md:gap-3'>
+              {[
+                { label: 'All Menu', value: 'ALL' },
+                { label: 'Food', value: 'FOOD' },
+                { label: 'Drink', value: 'DRINK' },
+              ].map((cat) => (
+                <button
+                  key={cat.value}
+                  onClick={() => {
+                    setActiveCategory(cat.value as 'ALL' | 'FOOD' | 'DRINK');
+                    setVisibleMenuCount(8);
+                  }}
+                  className={cn(
+                    'md:text-md h-10 rounded-full border px-4 text-sm tracking-tight whitespace-nowrap transition-all md:h-11.5 md:px-4',
+                    activeCategory === cat.value
+                      ? 'border-brand-primary bg-brand-primary/5 text-brand-primary font-bold'
+                      : 'border-neutral-200 font-semibold text-neutral-950 hover:border-neutral-300'
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Menu Grid */}
+          <div className='grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-x-5 md:gap-y-6 lg:grid-cols-4'>
+            {visibleMenus.map((item) => (
+              <MenuCard key={item.id} item={item} onAdd={handleAddToCart} />
+            ))}
+          </div>
+
+          {/* Show More Menu */}
+          {filteredMenu.length > MENU_INITIAL_COUNT && (
+            <div className='flex min-h-12 items-center justify-center'>
+              {hasMoreMenus ? (
+                <button
+                  onClick={() =>
+                    setVisibleMenuCount((prev) => prev + MENU_LOAD_INCREMENT)
+                  }
+                  className='h-12 rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
+                >
+                  Show More
+                </button>
+              ) : (
+                <p className='text-sm font-medium text-neutral-400 italic'>
+                  No more menu items to display
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Divider before Review */}
+      <div className='custom-container mx-auto'>
+        <hr className='my-4 border-t border-neutral-200 md:my-8' />
       </div>
+
+      {/* 4. Review Section */}
+      <section>
+        <div className='custom-container mx-auto flex flex-col gap-8'>
+          {/* Section Header */}
+          <div className='flex flex-col gap-2 md:gap-3'>
+            <h2 className='text-display-xs md:text-display-lg font-extrabold text-neutral-950'>
+              Review
+            </h2>
+            <div className='flex items-center gap-1'>
+              <Icon
+                icon='ri:star-fill'
+                className='text-rating size-4.5 md:size-6'
+              />
+              <span className='text-md font-extrabold text-neutral-950 md:text-xl'>
+                {restaurant.rating} ({restaurant.totalReview} Reviews)
+              </span>
+            </div>
+          </div>
+
+          {/* Review List */}
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6'>
+            {visibleReviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+
+          {/* Show More Reviews */}
+          {restaurant.reviews.length > REVIEW_INITIAL_COUNT && (
+            <div className='flex min-h-12 items-center justify-center'>
+              {hasMoreReviews ? (
+                <button
+                  onClick={() =>
+                    setVisibleReviewCount(
+                      (prev) => prev + REVIEW_LOAD_INCREMENT
+                    )
+                  }
+                  className='h-12 rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
+                >
+                  Show More
+                </button>
+              ) : (
+                <p className='text-sm font-medium text-neutral-400 italic'>
+                  You&apos;ve reached the end of reviews
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

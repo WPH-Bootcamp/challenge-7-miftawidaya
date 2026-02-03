@@ -1,5 +1,6 @@
 import axios from './axios';
 import { API_ENDPOINTS } from '@/config/api';
+import { DEFAULT_DISTANCE } from '@/config/constants';
 import { Restaurant, RestaurantDetail, MenuItem, Review } from '@/types';
 
 /**
@@ -11,6 +12,7 @@ interface ApiRestaurant {
   logo?: string;
   images?: string[];
   star?: number;
+  averageRating?: number;
   reviewCount?: number;
   totalReviews?: number;
   place?: string;
@@ -46,12 +48,13 @@ interface ApiReview {
 const mapRestaurant = (data: ApiRestaurant): Restaurant => ({
   id: String(data.id),
   name: data.name,
-  image: data.logo || data.images?.[0] || '',
-  rating: data.star ?? 0,
+  image: data.images?.[0] || data.logo || '',
+  rating: data.averageRating ?? data.star ?? 0,
   totalReview: data.reviewCount ?? data.totalReviews ?? 0,
   place: data.place ?? '',
-  distance: data.distance ?? '1.2',
+  distance: data.distance ?? DEFAULT_DISTANCE,
   category: data.category ?? '',
+  logo: data.logo,
 });
 
 const mapMenuItem = (data: ApiMenuItem): MenuItem => ({
@@ -82,8 +85,11 @@ export const restaurantService = {
   getDetail: async (id: string): Promise<RestaurantDetail> => {
     const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.DETAIL(id));
     const resto = data.data;
+    const mappedBase = mapRestaurant(resto);
+
     return {
-      ...mapRestaurant(resto),
+      ...mappedBase,
+      images: resto.images || (resto.logo ? [resto.logo] : []),
       menu: (resto.menus || []).map(mapMenuItem),
       reviews: (resto.reviews || []).map(mapReview),
     };

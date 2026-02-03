@@ -17,6 +17,7 @@ export interface Restaurant {
   place: string;
   distance: string | number;
   category: string;
+  logo?: string;
 }
 
 export interface MenuItem {
@@ -40,6 +41,7 @@ export interface Review {
 export interface RestaurantDetail extends Restaurant {
   menu: MenuItem[];
   reviews: Review[];
+  images?: string[];
 }
 
 /**

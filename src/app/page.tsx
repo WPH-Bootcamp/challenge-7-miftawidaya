@@ -15,22 +15,28 @@ import { Button } from '@/components/ui/button';
 import { useRecommendedRestaurants } from '@/services/queries';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/features/store';
+import {
+  RECOMMENDED_INITIAL_COUNT,
+  RECOMMENDED_LOAD_INCREMENT,
+} from '@/config/constants';
 
 export default function Home() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { data: recommended, isLoading } =
     useRecommendedRestaurants(isAuthenticated);
 
-  const INITIAL_COUNT = 6;
-  const [visibleCount, setVisibleCount] = React.useState(INITIAL_COUNT);
+  const [visibleCount, setVisibleCount] = React.useState(
+    RECOMMENDED_INITIAL_COUNT
+  );
 
   const handleShowMore = () => {
-    setVisibleCount((prev) => prev + 6);
+    setVisibleCount((prev) => prev + RECOMMENDED_LOAD_INCREMENT);
   };
 
   const visibleRestaurants = recommended?.slice(0, visibleCount);
   const hasMore = recommended && visibleCount < recommended.length;
-  const isListLongEnough = recommended && recommended.length >= INITIAL_COUNT;
+  const isListLongEnough =
+    recommended && recommended.length >= RECOMMENDED_INITIAL_COUNT;
 
   return (
     <div className='flex flex-col'>
@@ -66,7 +72,8 @@ export default function Home() {
             {isListLongEnough && (
               <div className='mt-4 flex min-h-10 items-center justify-center md:mt-8 md:min-h-12'>
                 {hasMore ||
-                (visibleCount === INITIAL_COUNT && isListLongEnough) ? (
+                (visibleCount === RECOMMENDED_INITIAL_COUNT &&
+                  isListLongEnough) ? (
                   <Button
                     variant='outline'
                     onClick={handleShowMore}
