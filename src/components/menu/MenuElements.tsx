@@ -43,12 +43,14 @@ export function MenuCard({
   quantity = 0,
   onIncrement,
   onDecrement,
+  isLoading,
 }: Readonly<{
   item: MenuItem;
   onAdd?: (item: MenuItem) => void;
   quantity?: number;
   onIncrement?: (item: MenuItem) => void;
   onDecrement?: (item: MenuItem) => void;
+  isLoading?: boolean;
 }>) {
   return (
     <div className='shadow-card flex flex-col overflow-hidden rounded-3xl bg-white transition-all hover:shadow-md'>
@@ -82,7 +84,8 @@ export function MenuCard({
               <button
                 type='button'
                 onClick={() => onAdd?.(item)}
-                className='bg-brand-primary md:text-md flex size-full items-center justify-center rounded-full text-sm font-bold tracking-tight text-white transition-opacity hover:opacity-90'
+                disabled={isLoading}
+                className='bg-brand-primary md:text-md flex size-full items-center justify-center rounded-full text-sm font-bold tracking-tight text-white transition-opacity hover:opacity-90 disabled:opacity-50'
               >
                 Add
               </button>
@@ -92,7 +95,8 @@ export function MenuCard({
                 <button
                   type='button'
                   onClick={() => onDecrement?.(item)}
-                  className='flex size-9 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition-colors hover:bg-neutral-50 md:size-10'
+                  disabled={isLoading}
+                  className='flex size-9 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition-colors hover:bg-neutral-50 disabled:opacity-50 md:size-10'
                   aria-label='Decrease quantity'
                 >
                   <Icon icon='ri:subtract-line' className='size-5 md:size-6' />
@@ -107,7 +111,8 @@ export function MenuCard({
                 <button
                   type='button'
                   onClick={() => onIncrement?.(item)}
-                  className='bg-brand-primary flex size-9 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90 md:size-10'
+                  disabled={isLoading}
+                  className='bg-brand-primary flex size-9 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90 disabled:opacity-50 md:size-10'
                   aria-label='Increase quantity'
                 >
                   <Icon icon='ri:add-line' className='size-5 md:size-6' />

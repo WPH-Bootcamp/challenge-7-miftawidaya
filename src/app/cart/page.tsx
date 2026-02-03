@@ -192,7 +192,7 @@ export default function CartPage() {
     }
   };
 
-  const isUpdating = updateQuantity.isPending || removeFromCart.isPending;
+  const isUpdating = false; // Full optimistic UI - no blocking during mutations
 
   return (
     <div className='pt-header-mobile md:pt-header flex min-h-screen flex-col bg-neutral-50 pb-10 md:pb-16'>

@@ -1,7 +1,13 @@
 import axios from './axios';
 import { API_ENDPOINTS } from '@/config/api';
 import { DEFAULT_DISTANCE } from '@/config/constants';
-import { Restaurant, RestaurantDetail, MenuItem, Review } from '@/types';
+import {
+  Restaurant,
+  RestaurantDetail,
+  MenuItem,
+  Review,
+  CartGroup,
+} from '@/types';
 
 /**
  * API Response interfaces for strict typing
@@ -40,6 +46,23 @@ interface ApiReview {
     name?: string;
     avatar?: string | null;
   };
+}
+
+interface ApiCartItem {
+  id: number | string;
+  menu: ApiMenuItem;
+  quantity: number | string;
+  itemTotal: number | string;
+}
+
+interface ApiCartGroup {
+  restaurant: {
+    id: number | string;
+    name: string;
+    logo?: string;
+  };
+  items: ApiCartItem[];
+  subtotal: number | string;
 }
 
 /**
@@ -103,9 +126,30 @@ export const restaurantService = {
 };
 
 export const cartService = {
-  getCart: async () => {
+  getCart: async (): Promise<CartGroup[]> => {
     const { data } = await axios.get(API_ENDPOINTS.CART.GET);
-    return data.data.cart;
+    const cart = data.data.cart || [];
+
+    // Normalize numeric fields to prevent string concatenation issues in calculations
+    return cart.map((group: ApiCartGroup) => ({
+      ...group,
+      restaurant: {
+        ...group.restaurant,
+        id: String(group.restaurant.id),
+      },
+      subtotal: Number(group.subtotal),
+      items: (group.items || []).map((item: ApiCartItem) => ({
+        ...item,
+        id: String(item.id),
+        quantity: Number(item.quantity),
+        itemTotal: Number(item.itemTotal),
+        menu: {
+          ...item.menu,
+          id: String(item.menu.id),
+          price: Number(item.menu.price),
+        },
+      })),
+    }));
   },
   addToCart: async (payload: {
     restaurantId: number | string;

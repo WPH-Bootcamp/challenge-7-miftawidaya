@@ -26,7 +26,6 @@ function SearchBar() {
     e.preventDefault();
     if (query.trim()) {
       // TODO: Navigate to search results page
-      console.log('Search:', query);
     }
   };
 

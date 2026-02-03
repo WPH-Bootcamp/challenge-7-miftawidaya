@@ -88,7 +88,6 @@ export default function RestaurantDetailPage() {
       menuId: item.id,
       quantity: 1,
     };
-    console.log('Adding to cart:', payload);
 
     addToCart.mutate(payload, {
       onError: (error) => {
@@ -393,6 +392,7 @@ export default function RestaurantDetailPage() {
                   quantity={cartItem?.quantity ?? 0}
                   onIncrement={handleIncrement}
                   onDecrement={handleDecrement}
+                  isLoading={false}
                 />
               );
             })}
