@@ -53,9 +53,8 @@ export function ImageWithFallback({
           'flex items-center justify-center bg-neutral-100',
           className
         )}
-        role='img'
-        aria-label={alt}
       >
+        <span className='sr-only'>{alt}</span>
         <Logo className={cn(iconSizeClass, 'text-brand-primary/30')} />
       </div>
     );

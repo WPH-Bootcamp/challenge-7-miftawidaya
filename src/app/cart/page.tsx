@@ -25,13 +25,13 @@ function CartItemCard({
   onIncrement,
   onDecrement,
   isUpdating,
-  priority = false,
+  eager = false,
 }: Readonly<{
   item: CartItemNested;
   onIncrement: () => void;
   onDecrement: () => void;
   isUpdating: boolean;
-  priority?: boolean;
+  eager?: boolean;
 }>) {
   return (
     <div className='flex items-center gap-3 md:gap-4'>
@@ -43,7 +43,7 @@ function CartItemCard({
           fill
           className='object-cover'
           fallbackIconSize='sm'
-          priority={priority}
+          loading={eager ? 'eager' : 'lazy'}
           sizes='(max-width: 768px) 64px, 80px'
         />
       </div>
@@ -136,7 +136,7 @@ function CartRestaurantGroup({
             onIncrement={() => onUpdateQuantity(item.id, item.quantity + 1)}
             onDecrement={() => onUpdateQuantity(item.id, item.quantity - 1)}
             isUpdating={isUpdating}
-            priority={index === 0}
+            eager={index === 0}
           />
         ))}
       </div>
