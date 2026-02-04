@@ -17,6 +17,7 @@ import { RootState } from '@/features/store';
 import { ROUTES } from '@/config/routes';
 import { CartGroup, CartItemNested } from '@/types';
 import { cn } from '@/lib/utils';
+import { QuantityControl } from '@/components/cart/QuantityControl';
 
 /**
  * Payment method options with bank logos
@@ -145,27 +146,34 @@ export default function CheckoutPage() {
           </h1>
 
           {/* Delivery Address Card */}
-          <section className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 md:gap-5 md:p-6'>
-            <div className='flex items-start gap-2'>
-              <Icon
-                icon='ri:map-pin-fill'
-                className='text-brand-primary mt-0.5 size-5'
-              />
-              <h3 className='text-md font-extrabold text-neutral-950 md:text-lg'>
-                Delivery Address
-              </h3>
-            </div>
-            <div className='flex flex-col gap-1 ps-7'>
-              <p className='md:text-md text-sm font-normal tracking-tight text-neutral-950'>
-                Jl. Sudirman No. 25, Jakarta Pusat, 10220
-              </p>
-              <p className='md:text-md text-sm font-normal tracking-tight text-neutral-950'>
-                0812-3456-7890
-              </p>
+          <section className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 md:gap-5 md:p-5'>
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center gap-2'>
+                <div className='relative size-6 shrink-0 md:size-8'>
+                  <Image
+                    src='/icons/icon-location.png'
+                    alt='Location'
+                    fill
+                    sizes='(max-width: 768px) 24px, 32px'
+                    className='object-contain'
+                  />
+                </div>
+                <h3 className='text-md font-extrabold tracking-tight text-neutral-950 md:text-lg'>
+                  Delivery Address
+                </h3>
+              </div>
+              <div className='flex flex-col gap-1'>
+                <p className='md:text-md text-sm font-medium tracking-tight text-neutral-950'>
+                  Jl. Sudirman No. 25, Jakarta Pusat, 10220
+                </p>
+                <p className='md:text-md text-sm font-medium tracking-tight text-neutral-950'>
+                  0812-3456-7890
+                </p>
+              </div>
             </div>
             <button
               type='button'
-              className='ms-7 w-fit rounded-full border border-neutral-200 px-6 py-2 text-sm font-bold text-neutral-950 transition-colors hover:bg-neutral-50'
+              className='md:text-md flex h-9 w-30 items-center justify-center rounded-full border border-neutral-300 text-sm font-bold tracking-tight text-neutral-950 transition-colors hover:bg-neutral-50 md:h-10'
             >
               Change
             </button>
@@ -234,30 +242,12 @@ export default function CheckoutPage() {
                     </div>
 
                     {/* Quantity Controls */}
-                    <div className='flex items-center gap-2'>
-                      <button
-                        type='button'
-                        onClick={() => handleDecrement(item)}
-                        className='flex size-8 items-center justify-center rounded-full border border-neutral-300 text-neutral-950 transition-colors hover:bg-neutral-50 md:size-9'
-                        aria-label='Decrease quantity'
-                      >
-                        <Icon
-                          icon='ri:subtract-line'
-                          className='size-4 md:size-5'
-                        />
-                      </button>
-                      <span className='text-md w-4 text-center font-bold text-neutral-950 md:text-lg'>
-                        {item.quantity}
-                      </span>
-                      <button
-                        type='button'
-                        onClick={() => handleIncrement(item)}
-                        className='bg-brand-primary flex size-8 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90 md:size-9'
-                        aria-label='Increase quantity'
-                      >
-                        <Icon icon='ri:add-line' className='size-4 md:size-5' />
-                      </button>
-                    </div>
+                    <QuantityControl
+                      quantity={item.quantity}
+                      onIncrement={() => handleIncrement(item)}
+                      onDecrement={() => handleDecrement(item)}
+                      isUpdating={updateQuantity.isPending}
+                    />
                   </div>
                 ))}
               </div>

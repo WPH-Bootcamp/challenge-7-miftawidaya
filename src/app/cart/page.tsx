@@ -14,6 +14,7 @@ import {
   useUpdateCartQuantity,
   useRemoveFromCart,
 } from '@/services/queries';
+import { QuantityControl } from '@/components/cart/QuantityControl';
 
 import type { CartGroup, CartItemNested } from '@/types';
 
@@ -59,29 +60,12 @@ function CartItemCard({
       </div>
 
       {/* Quantity Controls */}
-      <div className='flex items-center gap-2 md:gap-3'>
-        <button
-          type='button'
-          onClick={onDecrement}
-          disabled={isUpdating}
-          className='flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition-colors hover:bg-neutral-50 disabled:opacity-50 md:size-9'
-          aria-label='Decrease quantity'
-        >
-          <Icon icon='ri:subtract-line' className='size-4 md:size-5' />
-        </button>
-        <span className='md:text-md w-6 text-center text-sm font-semibold text-neutral-950'>
-          {item.quantity}
-        </span>
-        <button
-          type='button'
-          onClick={onIncrement}
-          disabled={isUpdating}
-          className='bg-brand-primary flex size-8 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90 disabled:opacity-50 md:size-9'
-          aria-label='Increase quantity'
-        >
-          <Icon icon='ri:add-line' className='size-4 md:size-5' />
-        </button>
-      </div>
+      <QuantityControl
+        quantity={item.quantity}
+        onIncrement={onIncrement}
+        onDecrement={onDecrement}
+        isUpdating={isUpdating}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 
+import { QuantityControl } from '@/components/cart/QuantityControl';
 import type { MenuItem, Review } from '@/types';
 
 /**
@@ -92,34 +93,14 @@ export function MenuCard({
                 Add
               </button>
             ) : (
-              <div className='flex size-full items-center justify-between'>
-                {/* Decrease Button */}
-                <button
-                  type='button'
-                  onClick={() => onDecrement?.(item)}
-                  disabled={isLoading}
-                  className='flex size-9 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition-colors hover:bg-neutral-50 disabled:opacity-50 md:size-10'
-                  aria-label='Decrease quantity'
-                >
-                  <Icon icon='ri:subtract-line' className='size-5 md:size-6' />
-                </button>
-
-                {/* Quantity Text */}
-                <span className='text-md w-4 text-center font-bold text-neutral-950 md:text-lg'>
-                  {quantity}
-                </span>
-
-                {/* Increase Button */}
-                <button
-                  type='button'
-                  onClick={() => onIncrement?.(item)}
-                  disabled={isLoading}
-                  className='bg-brand-primary flex size-9 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90 disabled:opacity-50 md:size-10'
-                  aria-label='Increase quantity'
-                >
-                  <Icon icon='ri:add-line' className='size-5 md:size-6' />
-                </button>
-              </div>
+              <QuantityControl
+                quantity={quantity}
+                onIncrement={() => onIncrement?.(item)}
+                onDecrement={() => onDecrement?.(item)}
+                isUpdating={isLoading}
+                size='md'
+                className='size-full justify-between gap-0'
+              />
             )}
           </div>
         </div>
