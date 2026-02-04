@@ -88,14 +88,14 @@ export default function CheckoutPage() {
   const handleCheckout = () => {
     const payload = {
       restaurants: cartData?.map((group: CartGroup) => ({
-        restaurantId: group.restaurant.id,
+        restaurantId: Number(group.restaurant.id),
         items: group.items.map((item: CartItemNested) => ({
-          menuId: item.menu.id,
-          quantity: item.quantity,
+          menuId: Number(item.menu.id),
+          quantity: Number(item.quantity),
         })),
       })),
       deliveryAddress: 'Jl. Sudirman No. 25, Jakarta Pusat, 10220',
-      phone: '0812-3456-7890',
+      phone: '081234567890',
       paymentMethod: selectedPayment.toUpperCase(),
       notes: '',
     };

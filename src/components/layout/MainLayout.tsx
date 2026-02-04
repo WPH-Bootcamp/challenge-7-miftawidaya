@@ -18,8 +18,10 @@ type MainLayoutProps = Readonly<PropsWithChildren>;
 export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/register';
+  const isCheckoutSuccessPage = pathname === '/checkout/success';
 
-  if (isAuthPage) {
+  // Pages that should not have Navbar and Footer
+  if (isAuthPage || isCheckoutSuccessPage) {
     return <main className='min-h-screen'>{children}</main>;
   }
 
