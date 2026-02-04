@@ -115,7 +115,12 @@ function OrderRestaurantCard({
         {orderStatus === 'done' && (
           <Button
             onClick={handleReviewClick}
-            className='bg-brand-primary hover:bg-brand-primary/90 text-md h-11 w-full rounded-full font-bold text-white md:h-12 md:w-60'
+            variant={existingReview ? 'outline' : 'default'}
+            className={cn(
+              'text-md h-11 w-full rounded-full font-bold md:h-12 md:w-60',
+              !existingReview &&
+                'bg-brand-primary hover:bg-brand-primary/90 text-white'
+            )}
           >
             {existingReview ? 'Edit Review' : 'Give Review'}
           </Button>
