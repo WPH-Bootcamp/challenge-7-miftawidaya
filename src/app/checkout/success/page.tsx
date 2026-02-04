@@ -31,12 +31,15 @@ export default function CheckoutSuccessPage() {
       {/* Main Container */}
       <div className='flex w-full max-w-107 flex-col items-center gap-7'>
         {/* Logo Header */}
-        <div className='flex items-center justify-center gap-3.75'>
+        <Link
+          href={ROUTES.HOME}
+          className='flex items-center justify-center gap-3.75 transition-opacity hover:opacity-80'
+        >
           <Logo className='text-brand-primary size-10.5' />
           <span className='text-display-md font-extrabold text-neutral-950'>
             Foody
           </span>
-        </div>
+        </Link>
 
         {/* Success Card */}
         <div className='shadow-card relative flex w-full flex-col items-center gap-4 rounded-2xl bg-white p-4 md:p-5'>
