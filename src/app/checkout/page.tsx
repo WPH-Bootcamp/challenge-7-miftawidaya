@@ -135,10 +135,10 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className='pt-header-mobile md:pt-header min-h-screen bg-white'>
-      <div className='custom-container mx-auto flex flex-col gap-6 py-6 md:gap-10 md:py-10 lg:flex-row lg:items-start'>
+    <div className='pt-header-mobile md:pt-header min-h-screen bg-neutral-50'>
+      <div className='custom-container mx-auto flex flex-col gap-6 py-6 md:gap-10 md:py-10 lg:flex-row lg:items-start lg:gap-8'>
         {/* Left Column: Checkout Details */}
-        <div className='flex flex-1 flex-col gap-6 md:gap-8'>
+        <div className='flex min-w-0 flex-1 flex-col gap-6 md:gap-8'>
           {/* Page Title */}
           <h1 className='text-display-xs md:text-display-sm font-extrabold text-neutral-950'>
             Checkout
@@ -368,8 +368,8 @@ export default function CheckoutPage() {
         </div>
 
         {/* Right Column: Payment Method & Summary (Desktop) */}
-        <aside className='hidden w-full max-w-md shrink-0 lg:block'>
-          <div className='shadow-card sticky top-28 flex flex-col gap-6 rounded-2xl bg-white p-6'>
+        <aside className='hidden w-full shrink-0 lg:block lg:w-90'>
+          <div className='shadow-card sticky top-24 flex flex-col gap-6 rounded-2xl bg-white p-6'>
             {/* Payment Method */}
             <div className='flex flex-col gap-4'>
               <h3 className='text-lg font-extrabold text-neutral-950'>
