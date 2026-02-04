@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { useSelector } from 'react-redux';
 
@@ -33,9 +33,31 @@ const PAYMENT_METHODS = [
  * CheckoutPage
  * @description Displays cart items, delivery address, payment method selection, and order summary.
  * Implements Figma design with responsive layout (2-column desktop, 1-column mobile).
+ * Supports per-restaurant checkout via ?restaurantId query param.
  */
 export default function CheckoutPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className='flex min-h-screen items-center justify-center bg-white'>
+          <div className='border-brand-primary size-10 animate-spin rounded-full border-4 border-t-transparent' />
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </React.Suspense>
+  );
+}
+
+/**
+ * CheckoutContent - Inner component that uses useSearchParams
+ * Wrapped in Suspense boundary in parent component for Next.js 16 compatibility
+ */
+function CheckoutContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const restaurantId = searchParams.get('restaurantId');
+
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { data: cartData, isLoading: isCartLoading } = useCart(isAuthenticated);
   const checkout = useCheckout();
@@ -44,23 +66,30 @@ export default function CheckoutPage() {
 
   const [selectedPayment, setSelectedPayment] = React.useState('bni');
 
-  // Calculations
-  const itemCount =
-    cartData?.reduce(
-      (acc: number, group: CartGroup) =>
-        acc +
-        group.items.reduce(
-          (sum: number, item: CartItemNested) => sum + item.quantity,
-          0
-        ),
-      0
-    ) ?? 0;
+  // Filter cart data by restaurantId if provided (per-restaurant checkout)
+  const filteredCartData = React.useMemo(() => {
+    if (!cartData) return [];
+    if (!restaurantId) return cartData; // Show all if no filter
+    return cartData.filter(
+      (group: CartGroup) => String(group.restaurant.id) === restaurantId
+    );
+  }, [cartData, restaurantId]);
 
-  const subtotal =
-    cartData?.reduce(
-      (acc: number, group: CartGroup) => acc + group.subtotal,
-      0
-    ) ?? 0;
+  // Calculations - use filtered data for per-restaurant checkout
+  const itemCount = filteredCartData.reduce(
+    (acc: number, group: CartGroup) =>
+      acc +
+      group.items.reduce(
+        (sum: number, item: CartItemNested) => sum + item.quantity,
+        0
+      ),
+    0
+  );
+
+  const subtotal = filteredCartData.reduce(
+    (acc: number, group: CartGroup) => acc + group.subtotal,
+    0
+  );
 
   const deliveryFee = 10000;
   const serviceFee = 1000;
@@ -85,9 +114,10 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    // Only checkout the filtered restaurants (per-restaurant checkout)
     const payload = {
-      restaurants: cartData?.map((group: CartGroup) => ({
+      restaurants: filteredCartData.map((group: CartGroup) => ({
         restaurantId: Number(group.restaurant.id),
         items: group.items.map((item: CartItemNested) => ({
           menuId: Number(item.menu.id),
@@ -100,9 +130,13 @@ export default function CheckoutPage() {
       notes: '',
     };
 
-    checkout.mutate(payload, {
-      onSuccess: () => router.push(ROUTES.CHECKOUT_SUCCESS),
-    });
+    try {
+      // Use mutateAsync to wait for mutation + onSuccess (cache invalidation) to complete
+      await checkout.mutateAsync(payload);
+      router.push(ROUTES.CHECKOUT_SUCCESS);
+    } catch {
+      // Error handling is done by mutation's onError if needed
+    }
   };
 
   // Loading state
@@ -114,8 +148,8 @@ export default function CheckoutPage() {
     );
   }
 
-  // Empty cart state
-  if (!cartData || cartData.length === 0) {
+  // Empty cart state or no items for selected restaurant
+  if (filteredCartData.length === 0) {
     return (
       <div className='flex min-h-screen flex-col items-center justify-center gap-6 bg-white px-4'>
         <Icon
@@ -123,13 +157,15 @@ export default function CheckoutPage() {
           className='size-20 text-neutral-200'
         />
         <h2 className='text-display-xs font-extrabold text-neutral-950'>
-          Your cart is empty
+          {restaurantId
+            ? 'No items from this restaurant'
+            : 'Your cart is empty'}
         </h2>
         <Button
-          onClick={() => router.push(ROUTES.HOME)}
+          onClick={() => router.push(restaurantId ? ROUTES.CART : ROUTES.HOME)}
           className='h-12 rounded-full px-8'
         >
-          Browse Restaurants
+          {restaurantId ? 'Back to Cart' : 'Browse Restaurants'}
         </Button>
       </div>
     );
@@ -180,7 +216,7 @@ export default function CheckoutPage() {
           </section>
 
           {/* Cart Items by Restaurant */}
-          {cartData.map((group: CartGroup) => (
+          {filteredCartData.map((group: CartGroup) => (
             <section
               key={String(group.restaurant.id)}
               className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 md:gap-5 md:p-6'

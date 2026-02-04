@@ -10,7 +10,8 @@ export const ROUTES = {
   CATEGORY: (id: string | number) => `/category/${id}`,
   RESTAURANT_DETAIL: (id: string | number) => `/resto/${id}`,
   CART: '/cart',
-  CHECKOUT: '/checkout',
+  CHECKOUT: (restaurantId?: string | number) =>
+    restaurantId ? `/checkout?restaurantId=${restaurantId}` : '/checkout',
   CHECKOUT_SUCCESS: '/checkout/success',
   ORDERS: '/orders',
   PROFILE: '/profile',
@@ -23,7 +24,7 @@ export const ROUTES = {
  */
 export const PROTECTED_ROUTES = [
   ROUTES.CART,
-  ROUTES.CHECKOUT,
+  ROUTES.CHECKOUT(), // Call as function for base path
   ROUTES.CHECKOUT_SUCCESS,
   ROUTES.ORDERS,
   ROUTES.PROFILE,

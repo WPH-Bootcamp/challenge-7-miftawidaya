@@ -28,7 +28,8 @@ export function CartSync() {
           addToCart.mutate(pendingItem, {
             onSuccess: () => {
               localStorage.removeItem('pending_cart_item');
-              router.push(ROUTES.CHECKOUT);
+              // Navigate to checkout for this specific restaurant
+              router.push(ROUTES.CHECKOUT(pendingItem.restaurantId));
             },
           });
         } catch (error) {

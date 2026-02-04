@@ -558,7 +558,7 @@ export default function RestaurantDetailPage() {
             </div>
 
             {/* Right: Checkout Button */}
-            <Link href={ROUTES.CHECKOUT}>
+            <Link href={ROUTES.CHECKOUT(restaurantId as string)}>
               <Button className='md:text-md h-10 w-40 rounded-full text-sm font-bold md:h-11 md:w-57.5'>
                 Checkout
               </Button>

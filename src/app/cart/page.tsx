@@ -135,7 +135,10 @@ function CartRestaurantGroup({
             Rp{group.subtotal.toLocaleString('id-ID')}
           </span>
         </div>
-        <Link href={ROUTES.CHECKOUT} className='w-full md:w-auto'>
+        <Link
+          href={ROUTES.CHECKOUT(group.restaurant.id)}
+          className='w-full md:w-auto'
+        >
           <Button className='md:text-md h-11 w-full rounded-full px-8 text-sm font-bold md:h-12 md:min-w-60'>
             Checkout
           </Button>
