@@ -1,6 +1,23 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { reviewService } from '@/services/api';
+import { Review } from '@/types';
 import { queryKeys } from './keys';
+
+/**
+ * Hook to fetch reviews for a specific restaurant
+ */
+export const useRestaurantReviews = (
+  restaurantId: string,
+  params?: Record<string, unknown>
+) => {
+  return useQuery<Review[]>({
+    queryKey: queryKeys.reviews.byRestaurant(restaurantId, params),
+    queryFn: () => reviewService.getRestaurantReviews(restaurantId, params),
+    enabled: !!restaurantId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    placeholderData: (previousData) => previousData, // Keep data while fetching new page
+  });
+};
 
 /**
  * Hook to create a new restaurant review

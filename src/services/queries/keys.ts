@@ -23,7 +23,7 @@ export const queryKeys = {
   },
   reviews: {
     all: ['reviews'] as const,
-    byRestaurant: (restaurantId: string) =>
-      [...queryKeys.reviews.all, 'restaurant', restaurantId] as const,
+    byRestaurant: (restaurantId: string, params?: Record<string, unknown>) =>
+      [...queryKeys.reviews.all, 'restaurant', restaurantId, params] as const,
   },
 };

@@ -9,9 +9,14 @@ import {
   useCart,
   useUpdateCartQuantity,
   useRemoveFromCart,
+  useRestaurantReviews,
 } from '@/services/queries';
-import { MenuCard, ReviewCard } from '@/components/menu/MenuElements';
-import { MenuItem, CartGroup, CartItemNested } from '@/types';
+import {
+  MenuCard,
+  ReviewCard,
+  ReviewCardSkeleton,
+} from '@/components/menu/MenuElements';
+import { MenuItem, CartGroup, CartItemNested, Review } from '@/types';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
@@ -50,6 +55,76 @@ export default function RestaurantDetailPage() {
   const removeFromCart = useRemoveFromCart();
   const { data: cartData } = useCart(isAuthenticated);
 
+  // State for filtering and pagination
+  const [activeCategory, setActiveCategory] = React.useState<
+    'ALL' | 'FOOD' | 'DRINK'
+  >('ALL');
+  const [visibleMenuCount, setVisibleMenuCount] =
+    React.useState(MENU_INITIAL_COUNT);
+  const [visibleReviewCount, setVisibleReviewCount] =
+    React.useState(REVIEW_INITIAL_COUNT);
+  const [isCartUpdating, setIsCartUpdating] = React.useState(false);
+
+  const { data: reviewsData, isFetching: isFetchingReviews } =
+    useRestaurantReviews(restaurantId as string, {
+      limit: visibleReviewCount,
+    });
+
+  // Derived data
+  const filteredMenu = React.useMemo(
+    () =>
+      (restaurant?.menu || []).filter((item) => {
+        if (activeCategory === 'ALL') return true;
+        return item.category === activeCategory;
+      }),
+    [restaurant?.menu, activeCategory]
+  );
+
+  const visibleMenus = React.useMemo(
+    () => filteredMenu.slice(0, visibleMenuCount),
+    [filteredMenu, visibleMenuCount]
+  );
+  const hasMoreMenus = visibleMenuCount < filteredMenu.length;
+
+  const visibleReviews =
+    reviewsData || (restaurant?.reviews || []).slice(0, visibleReviewCount);
+  const hasMoreReviews =
+    visibleReviewCount <
+    (restaurant?.totalReview ?? restaurant?.reviews?.length ?? 0);
+
+  // Observers for infinite scroll
+  const menuObserverRef = React.useRef<HTMLDivElement>(null);
+  const reviewObserverRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const menuObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreMenus) {
+          setVisibleMenuCount((prev) => prev + MENU_LOAD_INCREMENT);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (menuObserverRef.current) menuObserver.observe(menuObserverRef.current);
+    return () => menuObserver.disconnect();
+  }, [hasMoreMenus]);
+
+  React.useEffect(() => {
+    const reviewObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreReviews && !isFetchingReviews) {
+          setVisibleReviewCount((prev) => prev + REVIEW_LOAD_INCREMENT);
+        }
+      },
+      { threshold: 0.5 } // Trigger earlier for smoother transition
+    );
+
+    if (reviewObserverRef.current)
+      reviewObserver.observe(reviewObserverRef.current);
+    return () => reviewObserver.disconnect();
+  }, [hasMoreReviews, isFetchingReviews]);
+
   // Get cart data for current restaurant
   const currentRestoCart = cartData?.find(
     (group: CartGroup) => String(group.restaurant.id) === String(restaurantId)
@@ -60,16 +135,6 @@ export default function RestaurantDetailPage() {
       0
     ) ?? 0;
   const cartSubtotal = currentRestoCart?.subtotal ?? 0;
-
-  // State for filtering and pagination
-  const [activeCategory, setActiveCategory] = React.useState<
-    'ALL' | 'FOOD' | 'DRINK'
-  >('ALL');
-  const [visibleMenuCount, setVisibleMenuCount] =
-    React.useState(MENU_INITIAL_COUNT);
-  const [visibleReviewCount, setVisibleReviewCount] =
-    React.useState(REVIEW_INITIAL_COUNT);
-  const [isCartUpdating, setIsCartUpdating] = React.useState(false);
 
   // Trigger animation when cart changes
   React.useEffect(() => {
@@ -203,19 +268,6 @@ export default function RestaurantDetailPage() {
     );
 
   // Derived data
-  const filteredMenu = (restaurant.menu || []).filter((item) => {
-    if (activeCategory === 'ALL') return true;
-    return item.category === activeCategory;
-  });
-
-  const visibleMenus = filteredMenu.slice(0, visibleMenuCount);
-  const hasMoreMenus = visibleMenuCount < filteredMenu.length;
-
-  const visibleReviews = (restaurant.reviews || []).slice(
-    0,
-    visibleReviewCount
-  );
-  const hasMoreReviews = visibleReviewCount < (restaurant.reviews?.length || 0);
 
   const galleryImages = restaurant.images || [];
 
@@ -410,24 +462,13 @@ export default function RestaurantDetailPage() {
             })}
           </div>
 
-          {/* Show More Menu */}
-          {filteredMenu.length > MENU_INITIAL_COUNT && (
-            <div className='flex min-h-12 items-center justify-center'>
-              {hasMoreMenus ? (
-                <button
-                  onClick={() =>
-                    setVisibleMenuCount((prev) => prev + MENU_LOAD_INCREMENT)
-                  }
-                  className='h-12 cursor-pointer rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
-                >
-                  Show More
-                </button>
-              ) : (
-                <p className='text-sm font-medium text-neutral-400 italic'>
-                  No more menu items to display
-                </p>
-              )}
-            </div>
+          {/* Scroll Target for Menu Observer */}
+          {hasMoreMenus && <div ref={menuObserverRef} className='h-20' />}
+
+          {!hasMoreMenus && filteredMenu.length > MENU_INITIAL_COUNT && (
+            <p className='text-center text-sm font-medium text-neutral-400 italic'>
+              No more menu items to display
+            </p>
           )}
         </div>
       </section>
@@ -458,32 +499,28 @@ export default function RestaurantDetailPage() {
 
           {/* Review List */}
           <div className='grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6'>
-            {visibleReviews.map((review) => (
+            {visibleReviews.map((review: Review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
+
+            {/* Review Skeletons during loading more */}
+            {isFetchingReviews &&
+              Array.from({ length: REVIEW_LOAD_INCREMENT }).map((_, i) => (
+                <ReviewCardSkeleton
+                  key={`skeleton-${visibleReviews.length}-${i}`}
+                />
+              ))}
           </div>
 
-          {/* Show More Reviews */}
-          {restaurant.reviews.length > REVIEW_INITIAL_COUNT && (
-            <div className='flex min-h-12 items-center justify-center'>
-              {hasMoreReviews ? (
-                <button
-                  onClick={() =>
-                    setVisibleReviewCount(
-                      (prev) => prev + REVIEW_LOAD_INCREMENT
-                    )
-                  }
-                  className='h-12 cursor-pointer rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
-                >
-                  Show More
-                </button>
-              ) : (
-                <p className='text-sm font-medium text-neutral-400 italic'>
-                  You&apos;ve reached the end of reviews
-                </p>
-              )}
-            </div>
-          )}
+          {/* Scroll Target for Review Observer */}
+          {hasMoreReviews && <div ref={reviewObserverRef} className='h-20' />}
+
+          {!hasMoreReviews &&
+            (restaurant.totalReview ?? 0) > REVIEW_INITIAL_COUNT && (
+              <p className='text-center text-sm font-medium text-neutral-400 italic'>
+                You&apos;ve reached the end of reviews
+              </p>
+            )}
         </div>
       </section>
 

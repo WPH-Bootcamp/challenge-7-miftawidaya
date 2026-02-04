@@ -194,9 +194,11 @@ export const restaurantService = {
   },
   getDetail: async (
     id: string,
-    params?: { lat?: number; lng?: number }
+    params?: Record<string, unknown>
   ): Promise<RestaurantDetail> => {
-    const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.DETAIL(id));
+    const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.DETAIL(id), {
+      params,
+    });
     const resto = data.data;
     const mappedBase = mapRestaurant(resto, params);
 
@@ -302,9 +304,13 @@ export const reviewService = {
     const { data } = await axios.get(API_ENDPOINTS.REVIEWS.MY_REVIEWS);
     return data.data.reviews;
   },
-  getRestaurantReviews: async (restaurantId: string | number) => {
+  getRestaurantReviews: async (
+    restaurantId: string | number,
+    params?: Record<string, unknown>
+  ) => {
     const { data } = await axios.get(
-      API_ENDPOINTS.REVIEWS.RESTAURANT_REVIEWS(restaurantId)
+      API_ENDPOINTS.REVIEWS.RESTAURANT_REVIEWS(restaurantId),
+      { params }
     );
     return (data.data.reviews || []).map(mapReview);
   },

@@ -189,3 +189,51 @@ export function ReviewCard({ review }: Readonly<{ review: Review }>) {
     </div>
   );
 }
+/**
+ * MenuCardSkeleton
+ */
+export function MenuCardSkeleton() {
+  return (
+    <div className='shadow-card flex flex-col overflow-hidden rounded-3xl bg-white'>
+      <div className='relative aspect-square w-full animate-pulse bg-neutral-100' />
+      <div className='flex flex-col gap-3 p-4'>
+        <div className='flex items-center justify-between gap-2'>
+          <div className='flex flex-1 flex-col gap-2'>
+            <div className='h-5 w-3/4 animate-pulse rounded bg-neutral-100' />
+            <div className='h-6 w-1/2 animate-pulse rounded bg-neutral-100' />
+          </div>
+          <div className='h-9 w-28.5 animate-pulse rounded-full bg-neutral-100 md:h-10 md:w-30.75' />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ReviewCardSkeleton
+ */
+export function ReviewCardSkeleton() {
+  return (
+    <div className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4'>
+      <div className='flex items-start gap-3'>
+        <div className='size-review-avatar-mobile md:size-review-avatar-desktop animate-pulse rounded-full bg-neutral-100' />
+        <div className='flex flex-1 flex-col gap-2'>
+          <div className='h-5 w-1/3 animate-pulse rounded bg-neutral-100' />
+          <div className='h-4 w-1/2 animate-pulse rounded bg-neutral-100' />
+        </div>
+      </div>
+      <div className='flex flex-col gap-2'>
+        <div className='flex gap-1'>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className='size-4 animate-pulse rounded bg-neutral-100'
+            />
+          ))}
+        </div>
+        <div className='h-4 w-full animate-pulse rounded bg-neutral-100' />
+        <div className='h-4 w-2/3 animate-pulse rounded bg-neutral-100' />
+      </div>
+    </div>
+  );
+}
