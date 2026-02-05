@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/features/store';
 import { ROUTES } from '@/config/routes';
+import { Logo } from '@/components/icons';
 import {
   DEFAULT_DISTANCE,
   MENU_INITIAL_COUNT,
@@ -261,7 +262,7 @@ export default function RestaurantDetailPage() {
     return (
       <div className='flex h-screen items-center justify-center bg-white'>
         <div className='flex flex-col items-center gap-4'>
-          <div className='border-brand-primary size-12 animate-spin rounded-full border-4 border-t-transparent' />
+          <Logo className='text-brand-primary size-14 animate-spin' />
           <p className='font-bold text-neutral-500'>Loading deliciousness...</p>
         </div>
       </div>

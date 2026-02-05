@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { useSelector } from 'react-redux';
 
+import { Logo } from '@/components/icons';
 import {
   useCart,
   useCheckout,
@@ -40,7 +41,7 @@ export default function CheckoutPage() {
     <React.Suspense
       fallback={
         <div className='flex min-h-screen items-center justify-center bg-white'>
-          <div className='border-brand-primary size-10 animate-spin rounded-full border-4 border-t-transparent' />
+          <Logo className='text-brand-primary size-14 animate-spin' />
         </div>
       }
     >
@@ -143,7 +144,7 @@ function CheckoutContent() {
   if (isCartLoading) {
     return (
       <div className='flex min-h-screen items-center justify-center bg-white'>
-        <div className='border-brand-primary size-10 animate-spin rounded-full border-4 border-t-transparent' />
+        <Logo className='text-brand-primary size-14 animate-spin' />
       </div>
     );
   }
