@@ -172,21 +172,32 @@ export const useAddToCart = () => {
       );
 
       const restaurantId = String(newItem.restaurantId);
-      const restaurantDetail = queryClient.getQueryData<RestaurantDetail>(
-        queryKeys.restaurants.detail(restaurantId)
-      );
 
-      if (previousCart) {
-        queryClient.setQueryData<CartGroup[]>(queryKeys.cart.all, (old) => {
-          if (!old) return [];
-          return getUpdatedCartOnAdd(old, newItem, restaurantDetail);
-        });
-      }
+      // Use partial key match to find restaurant detail (may have different params like lat/lng)
+      const restaurantQueries = queryClient.getQueriesData<RestaurantDetail>({
+        queryKey: queryKeys.restaurants.details(),
+        predicate: (query) =>
+          Array.isArray(query.queryKey) &&
+          query.queryKey.includes(restaurantId),
+      });
+      const restaurantDetail = restaurantQueries[0]?.[1];
+
+      // Always perform optimistic update, even if previousCart is undefined
+      const currentCart = previousCart ?? [];
+      const optimisticCart = getUpdatedCartOnAdd(
+        currentCart,
+        newItem,
+        restaurantDetail
+      );
+      queryClient.setQueryData<CartGroup[]>(queryKeys.cart.all, optimisticCart);
 
       return { previousCart };
     },
     onError: (_err, _newItem, context) => {
-      if (context?.previousCart) {
+      // Rollback: restore previous cart or clear if it didn't exist
+      if (context?.previousCart === undefined) {
+        queryClient.removeQueries({ queryKey: queryKeys.cart.all });
+      } else {
         queryClient.setQueryData(queryKeys.cart.all, context.previousCart);
       }
     },
