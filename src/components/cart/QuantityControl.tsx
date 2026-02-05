@@ -62,7 +62,7 @@ export function QuantityControl({
       <span
         className={cn(
           'text-center font-bold text-neutral-950',
-          isSmall ? 'md:text-md w-6 text-sm' : 'text-md w-4 md:text-lg'
+          isSmall ? 'md:text-md min-w-6 text-sm' : 'text-md min-w-4 md:text-lg'
         )}
       >
         {quantity}

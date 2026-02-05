@@ -75,7 +75,7 @@ export function MenuCard({
 
       {/* Content Area */}
       <div className='flex flex-col gap-3 p-4'>
-        <div className='flex items-center justify-between gap-2'>
+        <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-2'>
           {/* Left: Name + Price */}
           <div className='flex flex-col gap-0.5 overflow-hidden'>
             <h4 className='md:text-md line-clamp-1 text-sm font-medium text-neutral-950'>
@@ -87,7 +87,7 @@ export function MenuCard({
           </div>
 
           {/* Right: Action Area */}
-          <div className='h-9 w-28.5 shrink-0 md:h-10 md:w-30.75'>
+          <div className='h-9 w-full shrink-0 md:h-10 md:w-30.75'>
             {quantity === 0 ? (
               <button
                 type='button'
@@ -104,7 +104,7 @@ export function MenuCard({
                 onDecrement={() => onDecrement?.(item)}
                 isUpdating={isLoading}
                 size='md'
-                className='size-full justify-between gap-0'
+                className='size-full justify-start gap-4'
               />
             )}
           </div>

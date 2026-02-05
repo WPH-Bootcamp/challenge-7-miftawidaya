@@ -434,7 +434,7 @@ export default function RestaurantDetailPage() {
 
       {/* 3. Menu Section */}
       <section>
-        <div className='custom-container mx-auto flex flex-col gap-8'>
+        <div className='custom-container mx-auto flex flex-col gap-8 pb-6'>
           <div className='flex flex-col gap-4 md:gap-6'>
             <h2 className='text-display-xs md:text-display-lg font-extrabold text-neutral-950'>
               Menu
