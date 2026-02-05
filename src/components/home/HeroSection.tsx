@@ -17,49 +17,85 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/config/routes';
 
+import { SearchAutocomplete } from './SearchAutocomplete';
+import { useAppDispatch, useAppSelector } from '@/features/store';
+import { setSearchQuery } from '@/features/filter/filterSlice';
+
 /**
  * SearchBar Component (Internal)
  * Renders a rounded search input with icon for restaurant search.
  */
 function SearchBar() {
   const router = useRouter();
-  const [query, setQuery] = React.useState('');
+  const dispatch = useAppDispatch();
+  const query = useAppSelector((state) => state.filter.searchQuery);
+  const [isFocused, setIsFocused] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      setIsFocused(false);
       router.push(
         `${ROUTES.CATEGORY('all')}?search=${encodeURIComponent(query)}`
       );
     }
   };
 
+  // Close autocomplete when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <form
-      onSubmit={handleSearch}
-      className={cn(
-        'flex w-full items-center gap-1.5 rounded-full bg-white',
-        'md:w-hero-search-desktop h-12 px-4 md:h-14 md:px-6'
-      )}
+    <div
+      ref={containerRef}
+      className='md:w-hero-search-desktop relative w-full'
     >
-      <Icon
-        icon='heroicons:magnifying-glass'
-        className='size-5 shrink-0 text-neutral-500'
-        aria-hidden='true'
-      />
-      <input
-        type='text'
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder='Search restaurants, food and drink'
+      <form
+        onSubmit={handleSearch}
         className={cn(
-          'grow bg-transparent outline-none placeholder:text-neutral-600',
-          'md:text-md text-sm tracking-tight'
+          'flex w-full items-center gap-1.5 rounded-full bg-white transition-all',
+          'h-12 px-4 md:h-14 md:px-6',
+          isFocused && 'ring-brand-primary/20 ring-2'
         )}
-        aria-label='Search restaurants'
+      >
+        <Icon
+          icon='heroicons:magnifying-glass'
+          className='size-5 shrink-0 text-neutral-500'
+          aria-hidden='true'
+        />
+        <input
+          type='text'
+          value={query}
+          onFocus={() => setIsFocused(true)}
+          onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+          placeholder='Search restaurants, food and drink'
+          className={cn(
+            'grow bg-transparent outline-none placeholder:text-neutral-600',
+            'md:text-md text-sm tracking-tight'
+          )}
+          aria-label='Search restaurants'
+        />
+        <span className='sr-only'>Search restaurants, food and drink</span>
+      </form>
+
+      <SearchAutocomplete
+        query={query}
+        isOpen={isFocused && query.length >= 2}
+        onClose={() => setIsFocused(false)}
       />
-      <span className='sr-only'>Search restaurants, food and drink</span>
-    </form>
+    </div>
   );
 }
 

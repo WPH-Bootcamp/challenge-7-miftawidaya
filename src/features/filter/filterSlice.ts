@@ -5,6 +5,7 @@ interface FilterState {
   maxPrice: string;
   rating: number | null;
   distance: string | null;
+  searchQuery: string;
 }
 
 const initialState: FilterState = {
@@ -12,6 +13,7 @@ const initialState: FilterState = {
   maxPrice: '',
   rating: null,
   distance: null,
+  searchQuery: '',
 };
 
 export const filterSlice = createSlice({
@@ -30,6 +32,9 @@ export const filterSlice = createSlice({
     setDistance: (state, action: PayloadAction<string | null>) => {
       state.distance = action.payload;
     },
+    setSearchQuery: (state, action: PayloadAction<string>) => {
+      state.searchQuery = action.payload;
+    },
     resetFilters: () => initialState,
   },
 });
@@ -39,6 +44,7 @@ export const {
   setMaxPrice,
   setRating,
   setDistance,
+  setSearchQuery,
   resetFilters,
 } = filterSlice.actions;
 

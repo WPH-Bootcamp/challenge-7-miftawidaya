@@ -20,10 +20,10 @@ function ProfileInfoRow({
 }>) {
   return (
     <div className='flex h-7 items-center justify-between md:h-7.5'>
-      <span className='text-[14px] font-medium tracking-[-0.03em] text-[#0A0D12] md:text-[16px]'>
+      <span className='text-md font-medium tracking-[-0.03em] text-neutral-950 md:text-lg'>
         {label}
       </span>
-      <span className='text-[14px] font-bold tracking-[-0.02em] text-[#0A0D12] md:text-[16px]'>
+      <span className='text-md font-bold tracking-[-0.02em] text-neutral-950 md:text-lg'>
         {value || '-'}
       </span>
     </div>
@@ -47,12 +47,12 @@ export default function ProfilePage() {
       {/* Main Content (Frame 72) */}
       <div className='flex min-w-0 flex-1 grow flex-col gap-6 md:max-w-131'>
         {/* Page Title (Profile) */}
-        <h1 className='text-display-xs leading-[36px] font-extrabold text-[#0A0D12] md:text-[32px] md:leading-[42px]'>
+        <h1 className='text-display-xs md:text-display-lg leading-9 font-extrabold text-neutral-950 md:leading-10.5'>
           Profile
         </h1>
 
         {/* Profile Card (Frame 71) */}
-        <div className='shadow-card flex w-full flex-col gap-6 rounded-[16px] bg-white p-4 md:p-[20px]'>
+        <div className='shadow-card flex w-full flex-col gap-6 rounded-2xl bg-white p-4 md:p-[20px]'>
           {/* Profile Info Wrapper (Frame 70) */}
           <div className='flex w-full flex-col gap-3 md:gap-3'>
             {/* Avatar (Ellipse 3) */}
@@ -78,7 +78,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Update Button (Button) */}
-          <Button className='bg-brand-primary hover:bg-brand-primary/90 h-[44px] w-full rounded-full text-base font-bold text-[#FDFDFD]'>
+          <Button className='bg-brand-primary hover:bg-brand-primary/90 h-11 w-full rounded-full text-base font-bold text-neutral-50'>
             Update Profile
           </Button>
         </div>
