@@ -130,7 +130,8 @@
   --shadow-card: 0 0 20px rgba(203, 202, 202, 0.25);
   --width-dropdown: 12.3125rem; /* 197px */
   --spacing-btn-auth: 10.1875rem; /* 163px */
-  --z-index-header: 100;
+  --z-header: 100;
+  --z-dropdown: 110;
   --transition-header: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Component Dimensions */

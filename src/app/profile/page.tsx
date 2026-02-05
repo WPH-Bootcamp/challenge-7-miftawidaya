@@ -2,61 +2,83 @@
 
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/features/store';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 
+import { RootState } from '@/features/store';
+import { Button } from '@/components/ui/button';
+import { ProfileSidebar } from '@/components/user/ProfileSidebar';
+
+/**
+ * ProfileInfoRow - Displays a label-value pair for profile information
+ */
+function ProfileInfoRow({
+  label,
+  value,
+}: Readonly<{
+  label: string;
+  value: string | undefined;
+}>) {
+  return (
+    <div className='flex h-7 items-center justify-between md:h-7.5'>
+      <span className='text-[14px] font-medium tracking-[-0.03em] text-[#0A0D12] md:text-[16px]'>
+        {label}
+      </span>
+      <span className='text-[14px] font-bold tracking-[-0.02em] text-[#0A0D12] md:text-[16px]'>
+        {value || '-'}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * ProfilePage Component
+ * @description User profile page showing personal information with sidebar on desktop
+ */
 export default function ProfilePage() {
   const { user } = useSelector((state: RootState) => state.auth);
 
   if (!user) return null;
 
   return (
-    <div className='custom-container mx-auto flex flex-col items-center gap-10 py-32'>
-      <div className='flex w-full max-w-2xl flex-col gap-10 rounded-3xl border border-neutral-100 bg-white p-10 shadow-sm'>
-        <div className='flex flex-col items-center gap-6'>
-          <div className='relative size-32 overflow-hidden rounded-full border-4 border-neutral-50'>
-            {user.avatar && user.avatar !== '' ? (
-              <Image
-                src={user.avatar}
-                alt={user.name}
-                fill
-                className='object-cover'
-              />
-            ) : (
-              <div className='text-display-xs flex h-full w-full items-center justify-center bg-neutral-100 font-bold text-neutral-400'>
-                {user.name.charAt(0)}
-              </div>
-            )}
-          </div>
-          <div className='text-center'>
-            <h1 className='text-display-xs font-extrabold text-neutral-950'>
-              {user.name}
-            </h1>
-            <p className='text-md text-neutral-500'>{user.email}</p>
-          </div>
-        </div>
+    <div className='custom-container mx-auto flex flex-col gap-6 py-20 md:flex-row md:items-start md:gap-8 md:py-32'>
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <ProfileSidebar />
 
-        <div className='flex flex-col gap-6 font-semibold'>
-          <div className='flex flex-col gap-2'>
-            <label className='text-sm text-neutral-600'>Full Name</label>
-            <Input defaultValue={user.name} className='h-12 rounded-xl' />
-          </div>
-          <div className='flex flex-col gap-2'>
-            <label className='text-sm text-neutral-600'>Email Address</label>
-            <Input
-              defaultValue={user.email}
-              disabled
-              className='h-12 rounded-xl bg-neutral-50'
-            />
-          </div>
-          <div className='flex flex-col gap-2'>
-            <label className='text-sm text-neutral-600'>Phone Number</label>
-            <Input defaultValue={user.phone} className='h-12 rounded-xl' />
+      {/* Main Content (Frame 72) */}
+      <div className='flex min-w-0 flex-1 grow flex-col gap-6 md:max-w-131'>
+        {/* Page Title (Profile) */}
+        <h1 className='text-display-xs leading-[36px] font-extrabold text-[#0A0D12] md:text-[32px] md:leading-[42px]'>
+          Profile
+        </h1>
+
+        {/* Profile Card (Frame 71) */}
+        <div className='shadow-card flex w-full flex-col gap-6 rounded-[16px] bg-white p-4 md:p-[20px]'>
+          {/* Profile Info Wrapper (Frame 70) */}
+          <div className='flex w-full flex-col gap-3 md:gap-3'>
+            {/* Avatar (Ellipse 3) */}
+            <div className='relative size-16 shrink-0 overflow-hidden rounded-full'>
+              {user.avatar && user.avatar !== '' ? (
+                <Image
+                  src={user.avatar}
+                  alt={user.name}
+                  fill
+                  className='object-cover'
+                />
+              ) : (
+                <div className='flex size-full items-center justify-center bg-neutral-200 text-xl font-bold text-neutral-500'>
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+
+            {/* Info Rows (Frame 53, 54, 55) */}
+            <ProfileInfoRow label='Name' value={user.name} />
+            <ProfileInfoRow label='Email' value={user.email} />
+            <ProfileInfoRow label='Nomor Handphone' value={user.phone} />
           </div>
 
-          <Button className='text-md mt-4 h-14 rounded-full font-bold'>
+          {/* Update Button (Button) */}
+          <Button className='bg-brand-primary hover:bg-brand-primary/90 h-[44px] w-full rounded-full text-base font-bold text-[#FDFDFD]'>
             Update Profile
           </Button>
         </div>

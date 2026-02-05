@@ -42,7 +42,7 @@ export function ProfileMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className='group flex cursor-pointer items-center gap-3 outline-hidden'>
-          <Avatar className='size-10 transition-transform group-hover:scale-105 md:size-12'>
+          <Avatar className='group-hover:ring-brand-primary size-10 transition-all group-hover:ring-2 group-hover:ring-offset-2 md:size-12'>
             <AvatarImage src={avatarUrl || undefined} alt={name} />
             <AvatarFallback className='bg-brand-primary text-base-white'>
               {name.charAt(0)}
@@ -51,7 +51,9 @@ export function ProfileMenu({
           <span
             className={cn(
               'duration-header hidden text-lg font-semibold transition-colors md:block',
-              isScrolled ? 'text-neutral-950' : 'text-base-white'
+              isScrolled
+                ? 'group-hover:text-brand-primary text-neutral-950'
+                : 'text-base-white group-hover:text-brand-primary'
             )}
           >
             {name}
@@ -59,20 +61,23 @@ export function ProfileMenu({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className='w-dropdown shadow-card flex flex-col gap-3 rounded-2xl border-none p-4'
+        className='w-dropdown z-dropdown shadow-card flex flex-col gap-3 rounded-2xl border-none p-4'
         align='end'
         sideOffset={12}
       >
-        <DropdownMenuLabel className='flex items-center gap-2 p-0'>
-          <Avatar className='size-9'>
-            <AvatarImage src={avatarUrl} alt={name} />
-            <AvatarFallback className='bg-brand-primary text-base-white text-xs'>
-              {name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <span className='text-md font-bold tracking-tight text-neutral-950'>
-            {name}
-          </span>
+        <DropdownMenuLabel className='p-0'>
+          <Link
+            href='/profile'
+            className='hover:text-brand-primary group flex items-center gap-2 p-0 outline-hidden transition-colors'
+          >
+            <Avatar className='group-hover:ring-brand-primary size-9 transition-all group-hover:ring-2 group-hover:ring-offset-2'>
+              <AvatarImage src={avatarUrl} alt={name} />
+              <AvatarFallback className='bg-brand-primary text-base-white text-xs'>
+                {name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <span className='text-md font-bold tracking-tight'>{name}</span>
+          </Link>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className='mx-0 my-0 h-px bg-neutral-200' />
         <div className='flex flex-col gap-3'>

@@ -53,17 +53,20 @@ export function ProfileSidebar({ className }: ProfileSidebarProps) {
       )}
     >
       {/* User Profile */}
-      <div className='flex items-center gap-2'>
-        <Avatar className='size-12'>
+      <Link
+        href='/profile'
+        className='group flex items-center gap-2 transition-colors'
+      >
+        <Avatar className='group-hover:ring-brand-primary size-12 transition-all group-hover:ring-2 group-hover:ring-offset-2'>
           <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
           <AvatarFallback className='bg-brand-primary text-base-white text-sm'>
             {user.name.charAt(0)}
           </AvatarFallback>
         </Avatar>
-        <span className='text-lg font-bold tracking-tight text-neutral-950'>
+        <span className='group-hover:text-brand-primary text-lg font-bold tracking-tight text-neutral-950 transition-colors'>
           {user.name}
         </span>
-      </div>
+      </Link>
 
       {/* Divider */}
       <div className='h-px w-full bg-neutral-200' />
