@@ -16,9 +16,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { RootState } from '@/features/store';
 import { ROUTES } from '@/config/routes';
-import { CartGroup, CartItemNested } from '@/types';
-import { cn } from '@/lib/utils';
 import { QuantityControl } from '@/components/cart/QuantityControl';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { CartGroup, CartItemNested } from '@/types';
 
 /**
  * Payment method options with bank logos
@@ -115,6 +116,10 @@ function CheckoutContent() {
     }
   };
 
+  // Submission loading state - prevents "Empty cart" jump after order success but before redirect
+  const isSubmitting = checkout.isPending;
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
+
   const handleCheckout = async () => {
     // Only checkout the filtered restaurants (per-restaurant checkout)
     const payload = {
@@ -132,25 +137,29 @@ function CheckoutContent() {
     };
 
     try {
+      setIsRedirecting(true);
       // Use mutateAsync to wait for mutation + onSuccess (cache invalidation) to complete
       await checkout.mutateAsync(payload);
       router.push(ROUTES.CHECKOUT_SUCCESS);
     } catch {
+      setIsRedirecting(false); // Reset on error so we can try again
       // Error handling is done by mutation's onError if needed
     }
   };
 
-  // Loading state
-  if (isCartLoading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-white'>
-        <Logo className='text-brand-primary size-14 animate-spin' />
-      </div>
-    );
+  // 1. Loading state: Show skeleton while cart is explicitly loading OR if data hasn't arrived yet
+  if (isCartLoading || cartData === undefined) {
+    return <CheckoutSkeleton />;
   }
 
-  // Empty cart state or no items for selected restaurant
-  if (filteredCartData.length === 0) {
+  // 2. Empty cart state: ONLY show if we have data, it's empty, and we aren't in the middle of submitting/redirecting
+  // Checked isAuthenticated to ensure we don't show empty state for guests briefly before they are redirected or auth resolves
+  if (
+    filteredCartData.length === 0 &&
+    !isSubmitting &&
+    !isRedirecting &&
+    cartData !== undefined
+  ) {
     return (
       <div className='flex min-h-screen flex-col items-center justify-center gap-6 bg-white px-4'>
         <Icon
@@ -173,7 +182,16 @@ function CheckoutContent() {
   }
 
   return (
-    <div className='pt-header-mobile md:pt-header min-h-screen bg-neutral-50'>
+    <div className='pt-header-mobile md:pt-header relative min-h-screen bg-neutral-50'>
+      {/* Submission Overlay */}
+      {(isSubmitting || isRedirecting) && (
+        <div className='fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm'>
+          <Logo className='text-brand-primary size-16 animate-spin' />
+          <p className='mt-4 text-lg font-bold text-neutral-950'>
+            {isRedirecting ? 'Redirecting...' : 'Placing your order...'}
+          </p>
+        </div>
+      )}
       <div className='custom-container mx-auto flex flex-col gap-6 py-6 md:gap-10 md:py-10 lg:flex-row lg:items-start lg:gap-8'>
         {/* Left Column: Checkout Details */}
         <div className='flex min-w-0 flex-1 flex-col gap-6 md:gap-8'>
@@ -497,6 +515,107 @@ function CheckoutContent() {
               >
                 {checkout.isPending ? 'Processing...' : 'Buy'}
               </Button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function CheckoutSkeleton() {
+  return (
+    <div className='pt-header-mobile md:pt-header min-h-screen bg-neutral-50'>
+      <div className='custom-container mx-auto flex flex-col gap-6 py-6 md:gap-10 md:py-10 lg:flex-row lg:items-start lg:gap-8'>
+        {/* Left Column Skeleton */}
+        <div className='flex min-w-0 flex-1 flex-col gap-6 md:gap-8'>
+          {/* Title */}
+          <Skeleton className='h-8 w-40 rounded-lg md:h-10 md:w-48' />
+
+          {/* Delivery Card Skeleton */}
+          <section className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 md:gap-5 md:p-5'>
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center gap-2'>
+                <Skeleton className='size-6 rounded-full md:size-8' />
+                <Skeleton className='h-6 w-32 rounded-lg md:h-7 md:w-40' />
+              </div>
+              <div className='flex flex-col gap-2'>
+                <Skeleton className='h-5 w-full rounded-md md:h-6' />
+                <Skeleton className='h-5 w-1/2 rounded-md md:h-6' />
+              </div>
+            </div>
+            {/* The missing "Change" button */}
+            <Skeleton className='h-9 w-30 rounded-full md:h-10' />
+          </section>
+
+          {/* Restaurant Group Skeleton */}
+          <section className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 md:gap-5 md:p-6'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <Skeleton className='size-6 rounded-full' />
+                <Skeleton className='h-6 w-28 rounded-lg md:h-7 md:w-36' />
+              </div>
+              <Skeleton className='h-8 w-24 rounded-full' />
+            </div>
+            <div className='flex flex-col gap-4'>
+              {[1, 2].map((i) => (
+                <div key={i} className='flex items-center gap-3'>
+                  <Skeleton className='size-16 rounded-xl md:size-20' />
+                  <div className='flex flex-1 flex-col gap-1.5'>
+                    <Skeleton className='h-5 w-3/4 rounded-md' />
+                    <Skeleton className='h-6 w-1/3 rounded-md' />
+                  </div>
+                  <Skeleton className='h-9 w-28 rounded-full md:h-10 md:w-32' />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Sections that appear on mobile only */}
+          <div className='flex flex-col gap-6 lg:hidden'>
+            {/* Payment Method (Mobile) */}
+            <section className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 md:p-6'>
+              <Skeleton className='h-6 w-36 rounded-lg md:h-7' />
+              <div className='flex flex-col gap-3'>
+                {[1, 2].map((i) => (
+                  <Skeleton key={i} className='h-14 w-full rounded-xl' />
+                ))}
+              </div>
+            </section>
+            {/* Summary (Mobile) */}
+            <section className='shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 md:p-6'>
+              <Skeleton className='h-6 w-40 rounded-lg md:h-7' />
+              <div className='flex flex-col gap-2'>
+                <Skeleton className='h-5 w-full' />
+                <Skeleton className='h-5 w-full' />
+                <Skeleton className='h-5 w-full' />
+                <Skeleton className='mt-2 h-12 w-full rounded-full' />
+              </div>
+            </section>
+          </div>
+        </div>
+
+        {/* Right Column Skeleton (Desktop Sidebar) */}
+        <aside className='hidden w-full shrink-0 lg:block lg:w-90'>
+          <div className='shadow-card sticky top-24 flex flex-col gap-6 rounded-2xl bg-white p-6'>
+            <div className='flex flex-col gap-4'>
+              <Skeleton className='h-7 w-40 rounded-lg' />
+              <div className='flex flex-col gap-3'>
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className='h-14 w-full rounded-xl' />
+                ))}
+              </div>
+            </div>
+            <div className='flex flex-col gap-4'>
+              <Skeleton className='h-7 w-48 rounded-lg' />
+              <div className='flex flex-col gap-2'>
+                <Skeleton className='h-5 w-full' />
+                <Skeleton className='h-5 w-full' />
+                <Skeleton className='h-5 w-full' />
+                <div className='my-2 h-px bg-neutral-100' />
+                <Skeleton className='h-7 w-full' />
+              </div>
+              <Skeleton className='mt-2 h-12 w-full rounded-full' />
             </div>
           </div>
         </aside>
