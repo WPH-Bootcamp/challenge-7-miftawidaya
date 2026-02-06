@@ -53,7 +53,7 @@ export function ProfileMenu({
               'duration-header hidden text-lg font-semibold transition-colors md:block',
               isScrolled
                 ? 'group-hover:text-brand-primary text-neutral-950'
-                : 'text-base-white group-hover:text-brand-primary'
+                : 'text-base-white'
             )}
           >
             {name}
