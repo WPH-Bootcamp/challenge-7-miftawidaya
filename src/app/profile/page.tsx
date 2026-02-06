@@ -201,6 +201,7 @@ export default function ProfilePage() {
                             src={avatarPreview || user.avatar || ''}
                             alt={user.name}
                             fill
+                            sizes='(max-width: 768px) 80px, 112px'
                             className='object-cover'
                             unoptimized={
                               !!avatarPreview ||
@@ -241,6 +242,7 @@ export default function ProfilePage() {
                           src={user.avatar}
                           alt={user.name}
                           fill
+                          sizes='(max-width: 768px) 64px, 80px'
                           className='object-cover'
                           unoptimized={
                             typeof user.avatar === 'string' &&
