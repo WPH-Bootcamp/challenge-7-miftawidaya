@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
 
-import { useOrders, useMyReviews } from '@/services/queries';
+import { useOrdersPaginated, useMyReviews } from '@/services/queries';
 import { cn, formatCurrency } from '@/lib/utils';
 import { OrderRestaurant, Review } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -212,9 +212,12 @@ function OrderList({
   orders,
   myReviews,
   onReview,
+  hasNextPage,
+  onLoadMore,
+  isFetchingNextPage,
 }: Readonly<{
   isLoading: boolean;
-  orders: ReturnType<typeof useOrders>['data'];
+  orders: import('@/types').Order[];
   myReviews?: Review[];
   onReview: (params: {
     restaurantId: string | number;
@@ -226,6 +229,9 @@ function OrderList({
     rating?: number;
     comment?: string;
   }) => void;
+  hasNextPage?: boolean;
+  onLoadMore?: () => void;
+  isFetchingNextPage?: boolean;
 }>) {
   if (isLoading) {
     return (
@@ -300,34 +306,58 @@ function OrderList({
           }
         />
       ))}
+
+      {/* Show More Button - Prefetched, no loading delay */}
+      {hasNextPage && onLoadMore && (
+        <div className='flex justify-center pt-2'>
+          <Button
+            variant='outline'
+            onClick={onLoadMore}
+            disabled={isFetchingNextPage}
+            className='md:text-md h-10 w-40 text-sm md:h-12'
+          >
+            {isFetchingNextPage ? 'Loading...' : 'Show More'}
+          </Button>
+        </div>
+      )}
+
+      {/* End of list message */}
+      {!hasNextPage && orders.length > 0 && (
+        <p className='pt-2 text-center text-sm font-medium text-neutral-400 italic'>
+          You&apos;ve reached the end of your orders
+        </p>
+      )}
     </div>
   );
 }
 
 /**
  * OrdersPage - Main orders page with sidebar and order list
- * @description Displays user's order history with filtering and search
+ * @description Displays user's order history with filtering, search, and pagination
  */
 export default function OrdersPage() {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const { data: orders, isLoading } = useOrders();
-  const { data: myReviews } = useMyReviews(isAuthenticated);
   const [activeFilter, setActiveFilter] = React.useState<StatusFilter>('done');
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  // Filter orders based on status and search
+  // Use paginated hook with status filter (status is handled server-side)
+  const statusParam = activeFilter === 'all' ? undefined : activeFilter;
+  const { orders, isLoading, hasNextPage, loadMore, isFetchingNextPage } =
+    useOrdersPaginated(statusParam);
+
+  const { data: myReviews } = useMyReviews(isAuthenticated);
+
+  // Client-side search filter (search is applied on accumulated results)
   const filteredOrders = React.useMemo(() => {
     if (!orders) return [];
-    return orders.filter((order) => {
-      const matchesStatus =
-        activeFilter === 'all' || order.status === activeFilter;
-      const matchesSearch = order.restaurants.some((r) =>
+    if (!searchQuery.trim()) return orders;
+    return orders.filter((order) =>
+      order.restaurants.some((r) =>
         r.restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      return matchesStatus && matchesSearch;
-    });
-  }, [orders, activeFilter, searchQuery]);
+      )
+    );
+  }, [orders, searchQuery]);
 
   return (
     <div className='custom-container mx-auto flex gap-6 py-20 md:gap-8 md:py-32'>
@@ -366,12 +396,15 @@ export default function OrdersPage() {
             onFilterChange={setActiveFilter}
           />
 
-          {/* Orders List */}
+          {/* Orders List with Pagination */}
           <OrderList
             isLoading={isLoading}
             orders={filteredOrders}
             myReviews={myReviews}
             onReview={(params) => dispatch(openReviewModal(params))}
+            hasNextPage={hasNextPage && !searchQuery.trim()}
+            onLoadMore={loadMore}
+            isFetchingNextPage={isFetchingNextPage}
           />
         </div>
       </div>

@@ -20,6 +20,9 @@ export const queryKeys = {
   },
   orders: {
     all: ['orders'] as const,
+    lists: () => [...queryKeys.orders.all, 'list'] as const,
+    list: (params?: { page?: number; limit?: number; status?: string }) =>
+      [...queryKeys.orders.lists(), params] as const,
   },
   reviews: {
     all: ['reviews'] as const,

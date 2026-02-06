@@ -380,6 +380,46 @@ export const orderService = {
     const { data } = await axios.get(API_ENDPOINTS.ORDERS.HISTORY);
     return (data.data.orders || []).map(mapOrder);
   },
+
+  /**
+   * Get orders with pagination support
+   * @param params - page, limit, status filters
+   * @returns orders array with pagination metadata
+   */
+  getOrdersPaginated: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }): Promise<{
+    orders: Order[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      hasNextPage: boolean;
+    };
+  }> => {
+    const { data } = await axios.get(API_ENDPOINTS.ORDERS.HISTORY, { params });
+    const orders = (data.data.orders || []).map(mapOrder);
+
+    // API returns: { page, limit, total, totalPages }
+    // We need to map to our expected format
+    const apiPagination = data.data.pagination;
+    const currentPage = apiPagination?.page ?? params?.page ?? 1;
+    const totalPages = apiPagination?.totalPages ?? 1;
+    const totalItems = apiPagination?.total ?? orders.length;
+    const hasNextPage = currentPage < totalPages;
+
+    return {
+      orders,
+      pagination: {
+        currentPage,
+        totalPages,
+        totalItems,
+        hasNextPage,
+      },
+    };
+  },
   checkout: async (payload: Record<string, unknown>) => {
     const { data } = await axios.post(API_ENDPOINTS.ORDERS.CHECKOUT, payload);
     return data.data;
