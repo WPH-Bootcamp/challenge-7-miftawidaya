@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { useSelector } from 'react-redux';
@@ -218,7 +219,7 @@ function CheckoutContent() {
     <div className='pt-header-mobile md:pt-header relative min-h-screen bg-neutral-50'>
       {/* Submission Overlay */}
       {(isSubmitting || isRedirecting) && (
-        <div className='fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm'>
+        <div className='bg-base-white fixed inset-0 z-50 flex flex-col items-center justify-center'>
           <Logo className='text-brand-primary size-16 animate-spin' />
           <p className='mt-4 text-lg font-bold text-neutral-950'>
             {isRedirecting ? 'Redirecting...' : 'Placing your order...'}
@@ -291,12 +292,12 @@ function CheckoutContent() {
                     {group.restaurant.name}
                   </h3>
                 </div>
-                <button
-                  type='button'
-                  className='rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-bold text-neutral-950 transition-colors hover:bg-neutral-50'
+                <Link
+                  href={ROUTES.RESTAURANT_DETAIL(group.restaurant.id)}
+                  className='cursor-pointer rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-bold text-neutral-950 transition-colors hover:bg-neutral-50'
                 >
                   Add Item
-                </button>
+                </Link>
               </div>
 
               {/* Item List */}
