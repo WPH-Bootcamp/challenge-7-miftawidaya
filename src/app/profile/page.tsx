@@ -10,7 +10,11 @@ import { toast } from 'sonner';
 
 import { RootState } from '@/features/store';
 import { Button } from '@/components/ui/button';
-import { ProfileSidebar } from '@/components/user/ProfileSidebar';
+import {
+  ProfileSidebar,
+  ProfileSidebarSkeleton,
+} from '@/components/user/ProfileSidebar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Form,
   FormControl,
@@ -42,6 +46,54 @@ function ProfileInfoRow({
       <span className='text-md font-bold tracking-[-0.02em] text-neutral-950 md:text-lg'>
         {value || '-'}
       </span>
+    </div>
+  );
+}
+
+/**
+ * ProfilePageSkeleton - Loading placeholder for ProfilePage
+ * @description Matches the layout and dimensions of the profile card to prevent layout shift.
+ */
+function ProfilePageSkeleton() {
+  return (
+    <div className='custom-container mx-auto flex flex-col gap-6 py-20 md:flex-row md:items-start md:gap-8 md:py-32'>
+      {/* Desktop Sidebar Skeleton */}
+      <ProfileSidebarSkeleton />
+
+      {/* Main Content Skeleton */}
+      <div className='flex min-w-0 flex-1 grow flex-col gap-6 md:max-w-131'>
+        {/* Page Title Skeleton */}
+        <Skeleton className='h-9 w-32 md:h-10.5 md:w-40' />
+
+        {/* Profile Card Skeleton */}
+        <div className='shadow-card flex w-full flex-col gap-6 rounded-2xl bg-white p-4 md:p-5'>
+          <div className='flex w-full flex-col gap-6'>
+            {/* Avatar Section Skeleton */}
+            <div className='flex flex-col gap-4'>
+              <Skeleton className='h-5 w-24' />
+              <Skeleton className='size-16 rounded-full md:size-20' />
+            </div>
+
+            {/* Info Rows Skeleton */}
+            <div className='flex flex-col gap-4 md:gap-5'>
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className='flex h-7 items-center justify-between md:h-7.5'
+                >
+                  <Skeleton className='h-5 w-24 md:h-6' />
+                  <Skeleton className='h-5 w-32 md:h-6' />
+                </div>
+              ))}
+            </div>
+
+            {/* Button Skeleton */}
+            <div className='pt-2'>
+              <Skeleton className='h-11 w-full rounded-full' />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -79,7 +131,7 @@ export default function ProfilePage() {
     }
   }, [user, form]);
 
-  if (!user) return null;
+  if (!user) return <ProfilePageSkeleton />;
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) {

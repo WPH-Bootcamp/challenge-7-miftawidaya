@@ -13,7 +13,9 @@ import { useProfile } from '@/services/queries/useAuth';
  * @description Handles authentication state hydration on application load.
  * Syncs the Redux state with the session stored in cookies.
  */
-export function AuthInitializer({ children }: { children: React.ReactNode }) {
+export function AuthInitializer({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const dispatch = useDispatch();
   const pathname = usePathname();
   const isAuthenticated = useSelector(
