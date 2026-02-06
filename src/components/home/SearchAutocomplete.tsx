@@ -114,7 +114,7 @@ export function SearchAutocomplete({
   };
 
   return (
-    <div className='shadow-card absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-2xl border border-neutral-100 bg-white py-2'>
+    <div className='shadow-card absolute top-full left-0 z-50 mt-2 max-h-[min(400px,70vh)] w-full overflow-y-auto rounded-2xl border border-neutral-100 bg-white py-2'>
       {renderContent()}
     </div>
   );

@@ -24,13 +24,24 @@ import { FilterLines } from '@untitledui/icons';
 import { cn } from '@/lib/utils';
 import { RootState } from '@/features/store';
 
-const getCategoryLabel = (id: string) => {
+const getCategoryLabel = (id: string, searchQuery?: string) => {
+  if (searchQuery) return searchQuery;
   if (id === 'all') return 'All Restaurant';
-  // Mapping other IDs if needed, or just capitalize
   return id
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+};
+
+const mapDistanceToMeters = (
+  distanceLabel: string | null
+): number | undefined => {
+  if (!distanceLabel) return undefined;
+  if (distanceLabel === 'Nearby') return 500;
+  if (distanceLabel === 'Within 1 km') return 1000;
+  if (distanceLabel === 'Within 3 km') return 3000;
+  if (distanceLabel === 'Within 5 km') return 5000;
+  return undefined;
 };
 
 export default function CategoryPage() {
@@ -56,11 +67,9 @@ export default function CategoryPage() {
     router.push(`/category/${categoryId}`);
   };
 
-  // 1. Sync URL -> Redux on mount
+  // 1. Sync URL -> Redux on mount and param change
   React.useEffect(() => {
-    if (initialSearch) {
-      dispatch(setSearchQuery(initialSearch));
-    }
+    dispatch(setSearchQuery(initialSearch));
   }, [dispatch, initialSearch]);
 
   // 2. Sync Redux -> URL on change
@@ -92,16 +101,29 @@ export default function CategoryPage() {
       ...(categoryId !== 'all' && { category: categoryId }),
       ...(latitude !== null && { lat: latitude }),
       ...(longitude !== null && { lng: longitude }),
-      ...(minPrice && { minPrice }),
-      ...(maxPrice && { maxPrice }),
-      ...(rating && { rating }),
-      ...(distance && { distanceFilter: distance }), // renamed to avoid conflict with numeric distance
+      ...(minPrice && { priceMin: Number(minPrice) }),
+      ...(maxPrice && { priceMax: Number(maxPrice) }),
+      ...(rating !== null && { rating: Number(rating) }),
+      ...(distance && { range: mapDistanceToMeters(distance) }),
       ...(searchQuery && { search: searchQuery }),
     },
     { enabled: !isLoadingLocation }
   );
 
   const isLoading = isLoadingLocation || isLoadingData;
+
+  // 3. Client-side filtering as a refinement layer
+  // Specifically for Rating: 4.0 - 4.9 maps to '4', etc.
+  const filteredRestaurants = React.useMemo(() => {
+    if (!restaurants) return [];
+    let list = [...restaurants];
+
+    if (rating !== null) {
+      list = list.filter((r) => Math.floor(r.rating) === rating);
+    }
+
+    return list;
+  }, [restaurants, rating]);
 
   const [visibleCount, setVisibleCount] = React.useState(
     RECOMMENDED_INITIAL_COUNT
@@ -111,10 +133,10 @@ export default function CategoryPage() {
     setVisibleCount((prev) => prev + RECOMMENDED_LOAD_INCREMENT);
   };
 
-  const visibleRestaurants = restaurants?.slice(0, visibleCount);
-  const hasMore = restaurants && visibleCount < restaurants.length;
+  const visibleRestaurants = filteredRestaurants.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredRestaurants.length;
   const isListLongEnough =
-    restaurants && restaurants.length >= RECOMMENDED_INITIAL_COUNT;
+    filteredRestaurants.length >= RECOMMENDED_INITIAL_COUNT;
 
   const [isFilterOpen, setIsFilterOpen] = React.useState(false);
 
@@ -141,7 +163,7 @@ export default function CategoryPage() {
         <h3 className='text-lg font-bold text-neutral-950'>
           No restaurants found
         </h3>
-        <p className='mt-2 mb-8 max-w-xs text-sm text-neutral-500'>
+        <p className='mt-2 mb-8 max-w-96 text-sm text-neutral-500'>
           We couldn't find any restaurants matching your current search or
           filters. Try adjusting them or clear all filters.
         </p>
@@ -159,12 +181,21 @@ export default function CategoryPage() {
     <div className='flex flex-col pt-24 pb-20 md:pt-32 md:pb-40'>
       <FilterSheet isOpen={isFilterOpen} onOpenChange={setIsFilterOpen} />
 
-      <div className='custom-container mx-auto flex flex-col'>
+      <div className='custom-container mx-auto flex flex-col gap-4 lg:gap-8'>
         {/* Title (Above the split) */}
-        <div className='mb-8 md:mb-12'>
+        <div>
           <h2 className='text-display-xs md:text-display-sm font-extrabold text-neutral-950'>
-            {getCategoryLabel(categoryId)}
+            {getCategoryLabel(categoryId, searchQuery)}
           </h2>
+          {searchQuery && (
+            <button
+              onClick={() => dispatch(setSearchQuery(''))}
+              className='text-brand-primary hover:text-brand-primary/80 mt-2 flex items-center gap-1.5 text-sm font-bold transition-colors'
+            >
+              <Icon icon='ri:close-circle-fill' className='size-5' />
+              <span>Clear search results for "{searchQuery}"</span>
+            </button>
+          )}
         </div>
 
         {/* Mobile Filter Trigger */}
@@ -172,24 +203,20 @@ export default function CategoryPage() {
           type='button'
           onClick={() => setIsFilterOpen(true)}
           className={cn(
-            'shadow-card bg-base-white relative mb-10 flex h-13 w-full items-center justify-center rounded-xl transition-transform active:scale-95 lg:hidden'
+            'shadow-card flex h-13 w-full items-center justify-between rounded-xl bg-white p-4 transition-transform active:scale-95 lg:hidden'
           )}
         >
-          <span className='px-6 text-sm font-extrabold text-neutral-950'>
-            Filter
+          <span className='text-sm leading-7 font-extrabold text-neutral-950'>
+            FILTER
           </span>
-          <div className='absolute end-4'>
-            <FilterLines
-              className='size-5 text-neutral-950'
-              strokeWidth={2.5}
-            />
-          </div>
+
+          <FilterLines className='size-5 text-neutral-950' strokeWidth={1.67} />
         </button>
 
         <div className='flex flex-col gap-10 lg:flex-row'>
           {/* 2. Left Sidebar Filter - Persistent on this page */}
-          <aside className='hidden w-full max-w-(--width-sidebar-desktop) shrink-0 lg:block'>
-            <div className='shadow-card sticky top-24 rounded-2xl border border-neutral-100 bg-white p-6'>
+          <aside className='hidden w-66.5 shrink-0 lg:block'>
+            <div className='shadow-card sticky top-24 rounded-xl border border-neutral-100 bg-white'>
               <FilterContent />
             </div>
           </aside>

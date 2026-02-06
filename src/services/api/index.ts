@@ -261,9 +261,14 @@ const mapOrder = (data: ApiOrder): Order => ({
 export const restaurantService = {
   getRestaurants: async (params?: Record<string, unknown>) => {
     let endpoint: string = API_ENDPOINTS.RESTAURANTS.LIST;
+    const requestParams = { ...params };
 
-    // Route special categories to their dedicated endpoints
-    if (params?.category === 'nearby') {
+    // Handle search query with dedicated endpoint and parameter 'q'
+    if (params?.search) {
+      endpoint = API_ENDPOINTS.RESTAURANTS.SEARCH;
+      requestParams.q = params.search;
+      delete requestParams.search;
+    } else if (params?.category === 'nearby') {
       endpoint = API_ENDPOINTS.RESTAURANTS.NEARBY;
     } else if (params?.category === 'best-seller') {
       endpoint = API_ENDPOINTS.RESTAURANTS.BEST_SELLER;
@@ -272,7 +277,7 @@ export const restaurantService = {
     }
 
     const { data } = await axios.get(endpoint, {
-      params,
+      params: requestParams,
     });
 
     const result = data.data;

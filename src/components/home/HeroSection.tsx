@@ -32,7 +32,7 @@ function SearchBar() {
   const [isFocused, setIsFocused] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const handleSearch = (e: React.BaseSyntheticEvent) => {
+  const handleSearch = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (query.trim()) {
       setIsFocused(false);
@@ -110,7 +110,7 @@ export function HeroSection() {
 
   return (
     <section
-      className='relative flex h-screen min-h-160 w-full items-center justify-center overflow-hidden bg-neutral-900'
+      className='relative z-20 flex h-screen min-h-160 w-full items-center justify-center bg-neutral-900'
       aria-label='Hero section'
     >
       {/* Background Image Container */}
