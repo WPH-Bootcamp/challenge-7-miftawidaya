@@ -13,6 +13,7 @@ import {
   useCheckout,
   useUpdateCartQuantity,
   useRemoveFromCart,
+  useOrders,
 } from '@/services/queries';
 import { queryKeys } from '@/services/queries/keys';
 import { cartService } from '@/services/api';
@@ -23,6 +24,7 @@ import { ROUTES } from '@/config/routes';
 import { QuantityControl } from '@/components/cart/QuantityControl';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { DEFAULT_DELIVERY_ADDRESS } from '@/config/constants';
 import { CartGroup, CartItemNested } from '@/types';
 
 /**
@@ -34,6 +36,14 @@ const PAYMENT_METHODS = [
   { id: 'bca', name: 'Bank Central Asia', logo: '/images/logo-bca.jpg' },
   { id: 'mandiri', name: 'Mandiri', logo: '/images/logo-mandiri.jpg' },
 ] as const;
+
+/**
+ * Constants for fallback data
+ */
+const STORAGE_KEYS = {
+  DELIVERY_ADDRESS: 'foody_delivery_address',
+  DELIVERY_PHONE: 'foody_delivery_phone',
+};
 
 /**
  * CheckoutPage
@@ -64,14 +74,54 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const restaurantId = searchParams.get('restaurantId');
 
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
   const { data: cartData, isLoading: isCartLoading } = useCart(isAuthenticated);
+  const { data: orderHistory } = useOrders();
   const checkout = useCheckout();
   const queryClient = useQueryClient();
   const updateQuantity = useUpdateCartQuantity();
   const removeFromCart = useRemoveFromCart();
 
   const [selectedPayment, setSelectedPayment] = React.useState('bni');
+  const [isEditingAddress, setIsEditingAddress] = React.useState(false);
+  const [address, setAddress] = React.useState('');
+  const [phone, setPhone] = React.useState('');
+
+  // Initial data loading
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // 1. Try LocalStorage first
+    const savedAddress = localStorage.getItem(STORAGE_KEYS.DELIVERY_ADDRESS);
+    const savedPhone = localStorage.getItem(STORAGE_KEYS.DELIVERY_PHONE);
+
+    if (savedAddress) {
+      setAddress(savedAddress);
+    } else if (orderHistory && orderHistory.length > 0) {
+      // 2. Fallback to last order address
+      setAddress(orderHistory[0].deliveryAddress);
+    } else {
+      // 3. Ultimate fallback
+      setAddress(DEFAULT_DELIVERY_ADDRESS);
+    }
+
+    if (savedPhone) {
+      setPhone(savedPhone);
+    } else if (user?.phone) {
+      // Fallback to profile phone
+      setPhone(user.phone);
+    }
+  }, [isAuthenticated, orderHistory, user?.phone]);
+
+  // Handle address/phone save
+  const handleSaveContact = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    localStorage.setItem(STORAGE_KEYS.DELIVERY_ADDRESS, address);
+    localStorage.setItem(STORAGE_KEYS.DELIVERY_PHONE, phone);
+    setIsEditingAddress(false);
+  };
 
   // Filter cart data by restaurantId if provided (per-restaurant checkout)
   const filteredCartData = React.useMemo(() => {
@@ -135,8 +185,8 @@ function CheckoutContent() {
           quantity: Number(item.quantity),
         })),
       })),
-      deliveryAddress: 'Jl. Sudirman No. 25, Jakarta Pusat, 10220',
-      phone: '081234567890',
+      deliveryAddress: address,
+      phone: phone,
       paymentMethod: selectedPayment.toUpperCase(),
       notes: '',
     };
@@ -251,21 +301,81 @@ function CheckoutContent() {
                   Delivery Address
                 </h3>
               </div>
-              <div className='flex flex-col gap-1'>
-                <p className='md:text-md text-sm font-medium tracking-tight text-neutral-950'>
-                  Jl. Sudirman No. 25, Jakarta Pusat, 10220
-                </p>
-                <p className='md:text-md text-sm font-medium tracking-tight text-neutral-950'>
-                  0812-3456-7890
-                </p>
-              </div>
+
+              {isEditingAddress ? (
+                <form
+                  onSubmit={handleSaveContact}
+                  className='mt-2 flex flex-col gap-4'
+                >
+                  <div className='flex flex-col gap-1.5'>
+                    <label
+                      htmlFor='address'
+                      className='text-xs font-bold text-neutral-500 uppercase'
+                    >
+                      Street Address
+                    </label>
+                    <input
+                      id='address'
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className='md:text-md focus:border-brand-primary focus:ring-brand-primary/20 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm font-medium tracking-tight text-neutral-950 outline-hidden transition-all focus:ring-2'
+                      placeholder='Enter your full address'
+                      required
+                    />
+                  </div>
+                  <div className='flex flex-col gap-1.5'>
+                    <label
+                      htmlFor='phone'
+                      className='text-xs font-bold text-neutral-500 uppercase'
+                    >
+                      Phone Number
+                    </label>
+                    <input
+                      id='phone'
+                      type='tel'
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className='md:text-md focus:border-brand-primary focus:ring-brand-primary/20 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm font-medium tracking-tight text-neutral-950 outline-hidden transition-all focus:ring-2'
+                      placeholder='08xx-xxxx-xxxx'
+                      required
+                    />
+                  </div>
+                  <div className='flex items-center gap-3 pt-2'>
+                    <button
+                      type='submit'
+                      className='md:text-md bg-brand-primary hover:bg-brand-primary/90 flex h-9 w-36 items-center justify-center rounded-full text-sm font-bold tracking-tight text-white transition-all md:h-10'
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setIsEditingAddress(false)}
+                      className='md:text-md flex h-9 w-24 items-center justify-center rounded-full border border-neutral-300 text-sm font-bold tracking-tight text-neutral-950 transition-colors hover:bg-neutral-50 md:h-10'
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className='flex flex-col gap-1'>
+                  <p className='md:text-md text-sm font-medium tracking-tight text-neutral-950'>
+                    {address}
+                  </p>
+                  <p className='md:text-md text-sm font-medium tracking-tight text-neutral-950'>
+                    {phone}
+                  </p>
+                </div>
+              )}
             </div>
-            <button
-              type='button'
-              className='md:text-md flex h-9 w-30 items-center justify-center rounded-full border border-neutral-300 text-sm font-bold tracking-tight text-neutral-950 transition-colors hover:bg-neutral-50 md:h-10'
-            >
-              Change
-            </button>
+            {!isEditingAddress && (
+              <button
+                type='button'
+                onClick={() => setIsEditingAddress(true)}
+                className='md:text-md flex h-9 w-30 items-center justify-center rounded-full border border-neutral-300 text-sm font-bold tracking-tight text-neutral-950 transition-colors hover:bg-neutral-50 md:h-10'
+              >
+                Change
+              </button>
+            )}
           </section>
 
           {/* Cart Items by Restaurant */}

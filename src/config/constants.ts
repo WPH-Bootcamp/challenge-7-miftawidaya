@@ -14,6 +14,8 @@ export const REVIEW_LOAD_INCREMENT = 6;
 // Default Fallbacks
 export const DEFAULT_DISTANCE = 2.4;
 export const DEFAULT_RATING = 0;
+export const DEFAULT_DELIVERY_ADDRESS =
+  'Jl. Sudirman No. 25, Jakarta Pusat, 10220';
 
 // API Limits
 export const API_LIMIT_MENU = 10;
